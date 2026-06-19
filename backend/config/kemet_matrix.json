@@ -1,0 +1,709 @@
+[
+    {
+        "id": "001",
+        "name": "Nun",
+        "shards": 1000000,
+        "tag": "Ceiling Node",
+        "price_susd": 500.0
+    },
+    {
+        "id": "002",
+        "name": "Horus",
+        "shards": 500000,
+        "tag": "Equalized",
+        "price_susd": 500.0
+    },
+    {
+        "id": "003",
+        "name": "Ra",
+        "shards": 500000,
+        "tag": "Equalized",
+        "price_susd": 500.0
+    },
+    {
+        "id": "004",
+        "name": "Atum",
+        "shards": 600000,
+        "price_susd": 500.0,
+        "tag": "Prime Emanation"
+    },
+    {
+        "id": "005",
+        "name": "Sobek",
+        "shards": 750000,
+        "tag": "Fixed Point Anchor",
+        "price_susd": 500.0
+    },
+    {
+        "id": "006",
+        "name": "Amun",
+        "shards": 600000,
+        "price_susd": 500.0,
+        "tag": "Prime Emanation"
+    },
+    {
+        "id": "007",
+        "name": "Mut",
+        "shards": 600000,
+        "price_susd": 500.0,
+        "tag": "Prime Emanation"
+    },
+    {
+        "id": "008",
+        "name": "Khonsu",
+        "shards": 600000,
+        "price_susd": 500.0,
+        "tag": "Prime Emanation"
+    },
+    {
+        "id": "009",
+        "name": "Shu",
+        "shards": 600000,
+        "price_susd": 500.0,
+        "tag": "Prime Emanation"
+    },
+    {
+        "id": "010",
+        "name": "Tefnut",
+        "shards": 600000,
+        "price_susd": 500.0,
+        "tag": "Prime Emanation"
+    },
+    {
+        "id": "011",
+        "name": "Geb",
+        "shards": 600000,
+        "price_susd": 500.0,
+        "tag": "Prime Emanation"
+    },
+    {
+        "id": "012",
+        "name": "Nut",
+        "shards": 600000,
+        "price_susd": 500.0,
+        "tag": "Prime Emanation"
+    },
+    {
+        "id": "013",
+        "name": "Osiris",
+        "shards": 600000,
+        "price_susd": 500.0,
+        "tag": "Prime Emanation"
+    },
+    {
+        "id": "014",
+        "name": "Isis",
+        "shards": 600000,
+        "price_susd": 500.0,
+        "tag": "Prime Emanation"
+    },
+    {
+        "id": "015",
+        "name": "Set",
+        "shards": 600000,
+        "price_susd": 500.0,
+        "tag": "Prime Emanation"
+    },
+    {
+        "id": "016",
+        "name": "Nephthys",
+        "shards": 800000,
+        "price_susd": 500.0,
+        "tag": "Ogdoad Matrix"
+    },
+    {
+        "id": "017",
+        "name": "Naunet",
+        "shards": 800000,
+        "price_susd": 500.0,
+        "tag": "Ogdoad Matrix"
+    },
+    {
+        "id": "018",
+        "name": "Heh",
+        "shards": 800000,
+        "price_susd": 500.0,
+        "tag": "Ogdoad Matrix"
+    },
+    {
+        "id": "019",
+        "name": "Hauhet",
+        "shards": 800000,
+        "price_susd": 500.0,
+        "tag": "Ogdoad Matrix"
+    },
+    {
+        "id": "020",
+        "name": "Kuk",
+        "shards": 800000,
+        "price_susd": 500.0,
+        "tag": "Ogdoad Matrix"
+    },
+    {
+        "id": "021",
+        "name": "Kauket",
+        "shards": 800000,
+        "price_susd": 500.0,
+        "tag": "Ogdoad Matrix"
+    },
+    {
+        "id": "022",
+        "name": "Anput",
+        "shards": 800000,
+        "price_susd": 500.0,
+        "tag": "Ogdoad Matrix"
+    },
+    {
+        "id": "023",
+        "name": "Anubis",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "024",
+        "name": "Thoth",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "025",
+        "name": "Ma'at",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "026",
+        "name": "Seshat",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "027",
+        "name": "Ptah",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "028",
+        "name": "Sekhmet",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "029",
+        "name": "Nefertem",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "030",
+        "name": "Bastet",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "031",
+        "name": "Hathor",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "032",
+        "name": "Anhur",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "033",
+        "name": "Taweret",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "034",
+        "name": "Bes",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "035",
+        "name": "Khnum",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "036",
+        "name": "Satet",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "037",
+        "name": "Anuket",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "038",
+        "name": "Min",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "039",
+        "name": "Serket",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "040",
+        "name": "Sobek-Ra",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "041",
+        "name": "Hapi",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "042",
+        "name": "Wadjet",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "043",
+        "name": "Nekhbet",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "044",
+        "name": "Khepri",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "045",
+        "name": "Kherty",
+        "shards": 550000,
+        "price_susd": 500.0,
+        "tag": "Cosmic Vector"
+    },
+    {
+        "id": "046",
+        "name": "Seker",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "047",
+        "name": "Sopdet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "048",
+        "name": "Sah",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "049",
+        "name": "Sopdu",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "050",
+        "name": "Aker",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "051",
+        "name": "Babi",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "052",
+        "name": "Wepwawet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "053",
+        "name": "Meskhenet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "054",
+        "name": "Renentet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "055",
+        "name": "Shai",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "056",
+        "name": "Hu",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "057",
+        "name": "Sia",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "058",
+        "name": "Heqet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "059",
+        "name": "Mafdet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "060",
+        "name": "Pakhet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "061",
+        "name": "Renenutet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "062",
+        "name": "Satis",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "063",
+        "name": "Tjenenet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "064",
+        "name": "Iunyt",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "065",
+        "name": "Wosret",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "066",
+        "name": "Hedetet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "067",
+        "name": "Meretseger",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "068",
+        "name": "Shed",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "069",
+        "name": "Tutu",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "070",
+        "name": "Yah",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "071",
+        "name": "Aani",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "072",
+        "name": "Imsety",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "073",
+        "name": "Duamutef",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "074",
+        "name": "Hapi-Canopic",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "075",
+        "name": "Qebehsenuef",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "076",
+        "name": "Maahes",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "077",
+        "name": "Khenty-Amentiu",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "078",
+        "name": "Nehebkau",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "079",
+        "name": "Unut",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "080",
+        "name": "Rem",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "081",
+        "name": "Shimeg",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "082",
+        "name": "Shesmu",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "083",
+        "name": "Sia-Ab",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "084",
+        "name": "Ta-Bitjet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "085",
+        "name": "Tenemet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "086",
+        "name": "Tpt-Rrd",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "087",
+        "name": "Uneg",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "088",
+        "name": "Wadj-Wer",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "089",
+        "name": "Ba-Pef",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "090",
+        "name": "Denwen",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "091",
+        "name": "Gengen-Wer",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "092",
+        "name": "Ha",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "093",
+        "name": "Iat",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "094",
+        "name": "Iusaas",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "095",
+        "name": "Kebechet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "096",
+        "name": "Mehit",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "097",
+        "name": "Menhit",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "098",
+        "name": "Mestjet",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "099",
+        "name": "Meurt",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "100",
+        "name": "Qebaut",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    },
+    {
+        "id": "101",
+        "name": "Sopd",
+        "shards": 450000,
+        "price_susd": 500.0,
+        "tag": "Elemental Matrix"
+    }
+]

@@ -1,0 +1,22 @@
+{
+  "tiers": {
+    "primary": {
+      "name": "Primary Architecture Status",
+      "fee_percentage": 0.02,
+      "cashback_multiplier": 0.0,
+      "max_daily_shards_purchasable": 50000
+    },
+    "platinum": {
+      "name": "Platinum Elite Sovereign",
+      "fee_percentage": 0.00,
+      "cashback_multiplier": 0.0,
+      "max_daily_shards_purchasable": 1000000
+    },
+    "bonus": {
+      "name": "Promotional Multiplier Account",
+      "fee_percentage": 0.01,
+      "cashback_multiplier": 0.03,
+      "max_daily_shards_purchasable": 25000
+    }
+  }
+}

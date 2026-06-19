@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milar Digital Art Asset</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased">
+
+    <!-- Header Navigation Hub -->
+    <header class="border-b border-gray-800 bg-gray-950 p-4 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-lg font-black tracking-wider text-amber-500 uppercase">🏛️ Milar Digital Art Asset </h1>
+                <p class="text-[10px] text-gray-500 font-mono mt-0.5">Direct Peer-to-Peer Inter-Account Settlement</p>
+            </div>
+            
+            <div class="flex items-center gap-3 bg-gray-900 p-2 rounded-xl border border-gray-800 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="px-1">
+                    <label class="text-[9px] text-gray-400 block font-bold tracking-widest uppercase">Active Identity Profile</label>
+                    <select id="userSelector" onchange="loadGridInventory()" class="bg-transparent text-sm font-mono font-bold text-amber-400 focus:outline-none cursor-pointer outline-none">
+                        <option value="User_Alpha" class="bg-gray-900 text-white">User_Alpha (α)</option>
+                        <option value="User_Beta" class="bg-gray-900 text-white">User_Beta (β)</option>
+                        <option value="User_Gamma" class="bg-gray-900 text-white">User_Gamma (γ)</option>
+                    </select>
+                </div>
+                <div class="border-l border-gray-800 pl-4 pr-1">
+                    <label class="text-[9px] text-gray-400 block font-bold tracking-widest uppercase">Assigned Fees Tier</label>
+                    <select id="tierSelector" class="bg-transparent text-xs font-mono font-bold text-gray-200 focus:outline-none cursor-pointer outline-none">
+                        <option value="Primary" class="bg-gray-900 text-white">Primary (2.0%)</option>
+                        <option value="Platinum" class="bg-gray-900 text-amber-400">Platinum (0.5%)</option>
+                        <option value="Bonus" class="bg-gray-900 text-emerald-400">Bonus (VIP)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+  <div class="w-full sm:w-72">
+                <input id="matrixSearch" type="text" placeholder=" Filter current shards nodes mapping query" oninput="filterLocalGrid()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs font-mono focus:outline-none focus:border-amber-500 text-white">
+            </div>
+    </header>
+
+    <!-- Content Workspace Area -->
+    <main class="max-w-7xl mx-auto p-6">
+        <div class="w-full border-b border-gray-800 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h2 class="text-xs font-mono tracking-widest text-gray-400 uppercase">101 Deity Asset Matrix Ledger</h2>
+          </div>
+
+        <section class="flex flex-col items-center justify-center w-full">
+            <div id="marketGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full justify-items-center justify-center">
+                <div class="text-center text-gray-500 py-12 col-span-full font-mono text-xs">Awaiting local matrix streaming payload arrays...</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000/api";
+        let localCacheMatrix = [];
+
+        async function loadGridInventory() {
+            const currentUser = document.getElementById("userSelector").value;
+            try {
+                const response = await fetch(`${API_BASE}/ledger?user=${currentUser}`);
+                if (!response.ok) throw new Error();
+                localCacheMatrix = await response.json();
+                renderGrid(localCacheMatrix);
+            } catch (err) {
+                document.getElementById("marketGrid").innerHTML = `
+                    <div class="col-span-full border border-red-950 bg-red-950/20 text-red-400 p-5 rounded-xl text-center text-xs font-mono max-w-xl">
+                        ⚠️ Terminal Error: Communication array severed. Run your backend main.py processing instance locally on port 8000.
+                    </div>
+                `;
+            }
+        }
+
+        function renderGrid(assets) {
+            const grid = document.getElementById("marketGrid");
+            grid.innerHTML = ""; 
+
+            assets.forEach(item => {
+                const ownedCount = item.user_owned_shards || 0;
+                const card = document.createElement("div");
+                card.className = "p-5 rounded-xl border border-gray-800/70 bg-gray-950 flex flex-col justify-between w-full max-w-sm hover:border-gray-700 transition duration-150 shadow-lg";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center gap-2 mb-3">
+                            <span class="font-mono text-[10px] text-gray-500 font-bold">NODE ADDRESS: #${item.id}</span>
+                            <span class="bg-gray-900 border border-gray-800/80 text-gray-400 text-[9px] px-2 py-0.5 rounded-md font-mono uppercase tracking-wide">${item.tag || 'NODE'}</span>
+                        </div>
+                        <h3 class="text-base font-bold text-white mb-1 tracking-wide">${item.name}</h3>
+                        
+                        <div class="mt-3 bg-gray-900 border border-gray-800/60 p-2.5 rounded-lg flex justify-between items-center">
+                            <span class="text-xs text-gray-400">Inventory Position:</span>
+                            <span class="text-xs font-mono font-bold ${ownedCount > 0 ? 'text-emerald-400 font-black' : 'text-gray-600'}">${ownedCount.toLocaleString()} Shards</span>
+                        </div>
+
+                        <div class="font-mono text-xs text-gray-400 mt-4 mb-4 flex justify-between items-center bg-gray-900/30 p-1.5 px-2.5 rounded-md border border-gray-900">
+                            <span class="text-gray-500 text-[11px]">Value Scale Matrix:</span>
+                            <span class="text-amber-500 font-black">$${item.price_susd || 500} SUSD</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-gray-900/60 mt-1">
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="qty-${item.id}" value="10" min="1" class="w-16 bg-gray-900 border border-gray-800 rounded-lg p-2 text-center text-xs font-mono font-bold text-white focus:outline-none">
+                            <div class="flex gap-2 flex-1">
+                                <button onclick="executeTrade('${item.id}', 'buy')" class="flex-1 bg-amber-500 hover:bg-amber-400 text-gray-950 font-black text-xs py-2 rounded-lg uppercase tracking-wider transition">Buy</button>
+                                <button onclick="executeTrade('${item.id}', 'sell')" class="flex-1 bg-gray-900 hover:bg-red-950/40 border border-gray-800 hover:border-red-900 text-gray-400 hover:text-red-400 font-bold text-xs py-2 rounded-lg uppercase tracking-wider transition ${ownedCount === 0 ? 'opacity-25 cursor-not-allowed' : ''}">Sell P2P</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterLocalGrid() {
+            const token = document.getElementById("matrixSearch").value.toLowerCase().trim();
+            const matching = localCacheMatrix.filter(item => 
+                item.name.toLowerCase().includes(token) || item.id.toString().includes(token)
+            );
+            renderGrid(matching);
+        }
+
+        async function executeTrade(assetId, actionType) {
+            const currentUser = document.getElementById("userSelector").value;
+            const targetTier = document.getElementById("tierSelector").value;
+            const size = parseInt(document.getElementById(`qty-${assetId}`).value);
+            let recipientUser = "";
+
+            if (actionType === "sell") {
+                // Compile dynamic targets excluding the current seller identity context
+                const userList = ["User_Alpha", "User_Beta", "User_Gamma"];
+                const choices = userList.filter(u => u !== currentUser);
+                
+                const responsePrompt = prompt(`Choose P2P Counterparty Recipient to sell to:\n\nType exactly: ${choices.join(" or ")}`);
+                if (responsePrompt === null) return; // User canceled
+                
+                recipientUser = responsePrompt.trim();
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/transaction`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        action: actionType,
+                        user: currentUser,
+                        target_recipient: recipientUser,
+                        tier: targetTier,
+                        asset_id: assetId,
+                        amount: size
+                    })
+                });
+
+                const payload = await response.json();
+                if (payload.status !== "synchronized") {
+                    alert(`🚨 Transfer Aborted: ${payload.message}`);
+                    return;
+                }
+
+                alert(`🎯 P2P Trade Synchronized!\n\n${payload.message}\n\nInvoice Total: $${payload.net_total_susd.toLocaleString()} SUSD\nYour Remaining Balance: ${payload.updated_inventory_balance} Shards`);
+                
+                loadGridInventory(); 
+            } catch (err) {
+                alert("❌ Gateway error. Pipeline down.");
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", loadGridInventory);
+    </script>
+</body>
+</html>
