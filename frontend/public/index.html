@@ -8,13 +8,15 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased">
 
+    <!-- AUTHENTICATION CONTAINER OVERLAY -->
     <div id="authOverlay" class="fixed inset-0 bg-gray-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
         <div class="bg-gray-900 border border-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl">
             <div class="text-center mb-6">
                 <h2 id="authTitle" class="text-xl font-black text-amber-500 uppercase tracking-widest">Connect to Semhal Core</h2>
-                <p id="authSubtitle" class="text-xs text-gray-400 mt-1">Provide your public key signature to link your ledger assets.</p>
+                <p id="authSubtitle" class="text-xs text-gray-400 mt-1">Provide your credentials to establish a ledger session.</p>
             </div>
 
+            <!-- Input Fields Array -->
             <div class="space-y-4">
                 <div>
                     <label class="text-[10px] uppercase tracking-wider text-gray-400 font-mono block mb-1">Public Wallet Address</label>
@@ -30,6 +32,7 @@
                 </div>
             </div>
 
+            <!-- Operational Control Triggers -->
             <div class="mt-6 space-y-2">
                 <button onclick="handleAuthSubmit()" id="primaryAuthBtn" class="w-full bg-amber-500 hover:bg-amber-400 text-gray-950 font-black py-3 rounded-xl uppercase tracking-wider transition text-sm shadow-md">Establish Login Session</button>
                 <div class="flex justify-between text-xs font-mono pt-2 px-1 text-gray-400">
@@ -40,6 +43,7 @@
         </div>
     </div>
 
+    <!-- MAIN PLATFORM CORE WORKSPACE -->
     <div id="appWorkspace" class="hidden">
         <header class="border-b border-gray-800 bg-gray-950 p-4 sticky top-0 z-40 shadow-md">
             <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -47,10 +51,11 @@
                     <h1 class="text-lg font-black tracking-wider text-amber-500 uppercase">🏛️ Milar Digital Art Asset</h1>
                     <p class="text-[10px] text-gray-500 font-mono mt-0.5">Semhal Network Synchronized Node Cluster</p>
                 </div>
-                <div class="flex items-center gap-4 bg-gray-900 p-2.5 rounded-xl border border-gray-800 w-full sm:w-auto justify-between">
+                <div class="flex items-center gap-4 bg-gray-900 p-2.5 rounded-xl border border-gray-800 w-full sm:w-auto justify-between gap-6">
                     <div>
-                        <label class="text-[9px] text-gray-400 block font-bold tracking-widest uppercase">Active Public Key</label>
-                        <span id="activeWalletDisplay" class="text-xs font-mono font-bold text-amber-400">0x00...0000</span>
+                        <label class="text-[9px] text-gray-400 block font-bold tracking-widest uppercase">Active Identity Profile</label>
+                        <span id="activeUserDisplay" class="text-xs font-mono font-bold text-amber-400 block">Loading User...</span>
+                        <span id="activeWalletDisplay" class="text-[10px] font-mono text-gray-500 block">0x...</span>
                     </div>
                     <button onclick="terminateSession()" class="text-xs bg-gray-950 border border-gray-800 px-3 py-1.5 rounded-lg hover:bg-red-950/30 font-mono text-gray-400 hover:text-red-400 transition">Disconnect</button>
                 </div>
@@ -72,6 +77,7 @@
     <script>
         const API_BASE = window.location.origin + "/api";
         let currentSessionWallet = "";
+        let currentSessionUser = "";
         let currentAuthMode = "login"; 
         let localCacheMatrix = [];
 
@@ -135,9 +141,13 @@
                     alert("Account registration broadcast accepted! Proceeding to initialize session.");
                 }
 
-                // Initialize authenticated dashboard state
+                // Initialize authenticated profile views
                 currentSessionWallet = wallet;
-                document.getElementById("activeWalletDisplay").innerText = wallet;
+                currentSessionUser = contact;
+                
+                document.getElementById("activeUserDisplay").innerText = currentSessionUser;
+                document.getElementById("activeWalletDisplay").innerText = currentSessionWallet;
+                
                 document.getElementById("authOverlay").classList.add("hidden");
                 document.getElementById("appWorkspace").classList.remove("hidden");
                 
@@ -186,7 +196,7 @@
 
                         <div class="font-mono text-xs text-gray-400 mt-4 mb-4 flex justify-between items-center bg-gray-900/30 p-1.5 px-2.5 rounded-md border border-gray-900">
                             <span class="text-gray-500 text-[11px]">Value Matrix:</span>
-                            <span class="text-amber-500 font-black">$${item.price_susd} SUSD</span>
+                            <span class="text-amber-500 font-black">${item.price_susd} SUSD</span>
                         </div>
                     </div>
 
@@ -216,11 +226,15 @@
             const size = parseInt(document.getElementById(`qty-${assetId}`).value);
             let recipientUser = "";
 
+            // Intercept workflow to enforce mandatory buyer identity address input parameters
             if (actionType === "sell") {
-                const responsePrompt = prompt("Enter targeted P2P recipient counterparty wallet public address:");
+                const responsePrompt = prompt("⚠️ CRITICAL SETTLEMENT:\nEnter buyer's Semhal Cryptocurrency public wallet address to authorize P2P transfer:");
                 if (responsePrompt === null) return; 
                 recipientUser = responsePrompt.trim();
-                if(!recipientUser) { alert("Invalid recipient target public address configuration."); return; }
+                if(!recipientUser || !recipientUser.startsWith("0x")) { 
+                    alert("🚨 Transaction Aborted: Invalid or malformed buyer Semhal public wallet key configuration."); 
+                    return; 
+                }
             }
 
             try {
@@ -242,7 +256,7 @@
                     return;
                 }
 
-                alert(`🎯 Cross-Network Transaction Synchronized!\n\n${payload.message}\n\nInvoice Total: $${payload.net_total_susd.toLocaleString()} SUSD`);
+                alert(`🎯 Cross-Network Transaction Synchronized!\n\n${payload.message}\n\nInvoice Total: ${(payload.net_total_susd).toFixed(4)} SUSD`);
                 loadGridInventory(); 
             } catch (err) {
                 alert("❌ Gateway transmission error. Network pipeline timed out.");
@@ -251,6 +265,7 @@
 
         function terminateSession() {
             currentSessionWallet = "";
+            currentSessionUser = "";
             document.getElementById("authOverlay").classList.remove("hidden");
             document.getElementById("appWorkspace").classList.add("hidden");
         }
