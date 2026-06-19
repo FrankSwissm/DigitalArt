@@ -8,7 +8,6 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased">
 
-    <!-- Header Navigation Hub -->
     <header class="border-b border-gray-800 bg-gray-950 p-4 sticky top-0 z-50 shadow-md">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
@@ -35,16 +34,15 @@
                 </div>
             </div>
         </div>
-  <div class="w-full sm:w-72">
-                <input id="matrixSearch" type="text" placeholder=" Filter current shards nodes mapping query" oninput="filterLocalGrid()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs font-mono focus:outline-none focus:border-amber-500 text-white">
-            </div>
+        <div class="w-full sm:w-72 mt-4 mx-auto sm:mx-0">
+            <input id="matrixSearch" type="text" placeholder=" Filter current shards nodes mapping query" oninput="filterLocalGrid()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs font-mono focus:outline-none focus:border-amber-500 text-white">
+        </div>
     </header>
 
-    <!-- Content Workspace Area -->
     <main class="max-w-7xl mx-auto p-6">
         <div class="w-full border-b border-gray-800 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
             <h2 class="text-xs font-mono tracking-widest text-gray-400 uppercase">101 Deity Asset Matrix Ledger</h2>
-          </div>
+        </div>
 
         <section class="flex flex-col items-center justify-center w-full">
             <div id="marketGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full justify-items-center justify-center">
@@ -54,7 +52,8 @@
     </main>
 
     <script>
-        const API_BASE = "http://127.0.0.1:8000/api";
+        // REDIRECTED TO LIVE WEB ENGINE INSTANCE
+        const API_BASE = "https://digitalart-k62s.onrender.com/api";
         let localCacheMatrix = [];
 
         async function loadGridInventory() {
@@ -66,8 +65,8 @@
                 renderGrid(localCacheMatrix);
             } catch (err) {
                 document.getElementById("marketGrid").innerHTML = `
-                    <div class="col-span-full border border-red-950 bg-red-950/20 text-red-400 p-5 rounded-xl text-center text-xs font-mono max-w-xl">
-                        ⚠️ Terminal Error: Communication array severed. Run your backend main.py processing instance locally on port 8000.
+                    <div class="col-span-full border border-red-950 bg-red-950/20 text-red-400 p-5 rounded-xl text-center text-xs font-mono max-w-xl mx-auto">
+                        ⚠️ Terminal Error: Communication array severed. Live platform instance at digitalart-k62s.onrender.com failed to respond.
                     </div>
                 `;
             }
@@ -130,12 +129,11 @@
             let recipientUser = "";
 
             if (actionType === "sell") {
-                // Compile dynamic targets excluding the current seller identity context
                 const userList = ["User_Alpha", "User_Beta", "User_Gamma"];
                 const choices = userList.filter(u => u !== currentUser);
                 
                 const responsePrompt = prompt(`Choose P2P Counterparty Recipient to sell to:\n\nType exactly: ${choices.join(" or ")}`);
-                if (responsePrompt === null) return; // User canceled
+                if (responsePrompt === null) return; 
                 
                 recipientUser = responsePrompt.trim();
             }
