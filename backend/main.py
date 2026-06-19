@@ -1,9 +1,10 @@
 import json
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
-app = Flask(__name__)
+# Configure Flask to resolve static and public assets from the sibling directory folder
+app = Flask(__name__, static_folder='../frontend/public', static_url_path='')
 CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -55,6 +56,12 @@ def modify_user_shard_balance(inventories, username, asset_id, delta):
         
     return new_balance
 
+# ─── SERVE FRONTEND INTERFACE ────────────────────────────────────────
+@app.route("/")
+def serve_frontend():
+    return send_from_directory(app.static_folder, "index.html")
+
+# ─── API ROUTE CONTROLLERS ───────────────────────────────────────────
 @app.route("/api/tiers", methods=["GET"])
 def get_tiers():
     return jsonify(load_json_file(TIERS_PATH, dict))
