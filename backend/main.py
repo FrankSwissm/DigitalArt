@@ -13,8 +13,20 @@ TIERS_PATH = os.path.join(BASE_DIR, "config", "user_tiers.json")
 
 # ─── CORE INTEGRATION ENDPOINTS ──────────────────────────────────────
 SEMHAL_ECOSYSTEM_URL = "https://semhal-crypto.onrender.com"
-TARGET_WALLET = "0xc9cx19b9f02783c68d5fde432005539e9424e228"
-PRICE_PER_SHARD = 500.00
+
+# Re-routed to your explicit Milar Digital Art Asset target account
+TARGET_WALLET = "0x0A5AbC999e6880059B321496336BC173A1667AF0"
+
+# ─── RE-CALIBRATED ECONOMIC PARAMETERS ───────────────────────────────
+TOTAL_SHARDS = 1000000000              # Expanded to 1,000,000,000 shards
+TOTAL_PRICE_USD = 1000000000000         # Total Cap: 1,000,000,000,000 USD
+PRICE_PER_SHARD = 1000.00               # 1 Shard = 1,000 USD / SUSD
+
+# Shard Deduction & Allocation Architecture for 101 Deities:
+SOLD_SHARDS = 86866200
+REMAINING_SHARDS = TOTAL_SHARDS - SOLD_SHARDS  # 913,133,800 Shards remaining
+DEITY_COUNT = 101
+SHARDS_PER_DEITY = REMAINING_SHARDS / DEITY_COUNT # 9,040,928.712871287 Shards each
 
 def load_json_file(path, default_factory):
     if os.path.exists(path):
@@ -33,7 +45,6 @@ def serve_frontend():
 def proxy_register():
     data = request.json or {}
     try:
-        # Relays registration details right to Semhal network node
         response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/register", json=data, timeout=10)
         return jsonify(response.json()), response.status_code
     except requests.exceptions.RequestException:
@@ -62,7 +73,6 @@ def get_ledger():
     matrix = load_json_file(MATRIX_PATH, list)
     wallet = request.args.get("wallet", "").strip()
     
-    # Query Semhal to dynamically read user's current token inventory
     user_shards = {}
     if wallet:
         try:
@@ -70,7 +80,7 @@ def get_ledger():
             if res.status_code == 200:
                 user_shards = res.json().get("shards_inventory", {})
         except requests.exceptions.RequestException:
-            pass # Fallback to 0 if remote service fails to return profile positions
+            pass
 
     for item in matrix:
         item["price_susd"] = PRICE_PER_SHARD
@@ -92,7 +102,7 @@ def process_transaction():
         
     base_value = amount * PRICE_PER_SHARD
 
-    # Synchronize transaction parameters to the external Semhal balance processor
+    # Synchronize transaction parameters with updated economic rules
     payload = {
         "wallet": wallet,
         "target_recipient": target_recipient,
@@ -100,7 +110,12 @@ def process_transaction():
         "asset_id": asset_id,
         "amount": amount,
         "total_value_susd": base_value,
-        "escrow_target": TARGET_WALLET
+        "escrow_target": TARGET_WALLET,
+        "system_meta": {
+            "total_shards": TOTAL_SHARDS,
+            "shards_per_deity": SHARDS_PER_DEITY,
+            "sold_shards_offset": SOLD_SHARDS
+        }
     }
 
     try:
