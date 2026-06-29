@@ -44,6 +44,22 @@ def serve_frontend():
 @app.route("/api/auth/register", methods=["POST"])
 def proxy_register():
     data = request.json or {}
+    wallet = data.get("wallet", "").strip()
+    password = data.get("password", "").strip()
+
+    # Enforce registration requires an exact public cryptocurrency wallet key layout
+    if not wallet or not wallet.startswith("0x") or len(wallet) < 42:
+        return jsonify({
+            "status": "error", 
+            "message": "Registration rejected: Malformed or missing exact Semhal cryptocurrency public address signature layout."
+        }), 400
+
+    if not password:
+        return jsonify({
+            "status": "error", 
+            "message": "Registration rejected: Password parameter sequence must not be empty."
+        }), 400
+
     try:
         response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/register", json=data, timeout=10)
         return jsonify(response.json()), response.status_code
