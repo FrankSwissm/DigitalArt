@@ -158,11 +158,27 @@ def process_transaction():
     }
     
     try:
-        # Hits Semhal endpoint to verify balance, deduct from user, and credit Milar Escrow account
-        response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/settle-transaction", json=payload, timeout=15)
-        res_json = response.json() if response.content else {}
+        # Extended timeout to give the server ample window to complete cold wake-ups
+        response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/settle-transaction", json=payload, timeout=25)
         
-        if response.status_code != 200 or res_json.get("status") == "rejected":
+        # Guarded check to safely extract JSON parameters or trace structural text returns
+        res_json = {}
+        if response.status_code == 200:
+            try:
+                res_json = response.json()
+            except ValueError:
+                return jsonify({
+                    "status": "rejected",
+                    "message": "Protocol Misalignment: Semhal system responded with non-JSON text payload."
+                }), 502
+        else:
+            print(f"Semhal Raw Error Response Log: {response.text}")
+            return jsonify({
+                "status": "rejected",
+                "message": f"Semhal remote core node rejected transaction with status code {response.status_code}."
+            }), response.status_code
+        
+        if res_json.get("status") == "rejected":
             return jsonify({
                 "status": "rejected",
                 "message": res_json.get("message", "Transaction rejected: Semhal Core reported insufficient funds or failed balance modification.")
@@ -180,7 +196,7 @@ def process_transaction():
             with conn.cursor() as cur:
                 cur.execute(
                     """INSERT INTO milar_transactions (sender_wallet, receiver_wallet, asset_id, action_type, amount_shards, price_per_shard, total_value_susd)
-                       VALUES (%s, %s, %s, %s, %s, %s, %s);""",
+                       VALUES (%s, %s, %s, %s, %s, %s);""",
                     (sender_shard_wallet, receiver_shard_wallet, asset_id, action, amount, PRICE_PER_SHARD, base_value)
                 )
                 conn.commit()
