@@ -5,9 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Milar Digital Art Asset Ledger</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .holo-glow {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.15), inset 0 0 15px rgba(245, 158, 11, 0.05);
+        }
+        .holo-border {
+            background: linear-gradient(90deg, #f59e0b, #b45309, #f59e0b);
+            background-size: 200% auto;
+            animation: shine 4s linear infinite;
+        }
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+    </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased">
 
+    <!-- ─── AUTHENTICATION OVERLAY ──────────────────────────────────────── -->
     <div id="authOverlay" class="fixed inset-0 bg-gray-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
         <div class="bg-gray-900 border border-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl">
             <div class="text-center mb-6">
@@ -40,6 +54,57 @@
         </div>
     </div>
 
+    <!-- ─── PREMIUM TRANSACTION MODAL (HIGH VISUAL ATTRACTIVENESS) ──────── -->
+    <div id="receiptModal" class="fixed inset-0 bg-gray-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-all duration-300">
+        <div class="bg-gray-950 border border-amber-500/30 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl holo-glow flex flex-col">
+            <div class="h-[3px] w-full holo-border"></div>
+            
+            <div class="p-6 flex-1">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <span class="text-[9px] font-mono tracking-widest text-amber-500 uppercase bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Settlement Verified</span>
+                        <h2 class="text-lg font-black text-white mt-1 tracking-wide uppercase">Semhal Core Network Receipts</h2>
+                    </div>
+                    <div class="text-right font-mono text-[10px] text-gray-500" id="receiptTime">00/00/0000, 00:00:00</div>
+                </div>
+
+                <!-- Balance Vector Pipeline Display -->
+                <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4 mb-4 space-y-3 font-mono text-xs">
+                    <div class="flex justify-between items-center bg-gray-950/50 p-2.5 rounded-lg border border-red-500/10">
+                        <span class="text-gray-400 text-[11px]">🔴 Debited (From Buyer):</span>
+                        <span id="receiptDebitWallet" class="text-red-400 font-bold truncate max-w-[200px] text-right">0x...</span>
+                    </div>
+                    <div class="flex justify-center my-1 text-amber-500/60 text-lg animate-pulse">👇 Mapping Liquidity Matrix Pool Pipeline 👇</div>
+                    <div class="flex justify-between items-center bg-gray-950/50 p-2.5 rounded-lg border border-emerald-500/10">
+                        <span class="text-gray-400 text-[11px]">🟢 Credited (To Milar Node):</span>
+                        <span id="receiptCreditWallet" class="text-emerald-400 font-bold truncate max-w-[200px] text-right">0x...</span>
+                    </div>
+                </div>
+
+                <!-- Data Field Grid -->
+                <div class="grid grid-cols-2 gap-3 font-mono text-xs mb-4">
+                    <div class="bg-gray-900/40 p-3 rounded-xl border border-gray-800/60">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Asset Tranche Size</div>
+                        <div class="text-white font-black text-sm" id="receiptAmount">0.00 Shards</div>
+                    </div>
+                    <div class="bg-gray-900/40 p-3 rounded-xl border border-gray-800/60">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">SUSD Valuation Basis</div>
+                        <div class="text-amber-400 font-black text-sm" id="receiptValue">$0.00 SUSD</div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-500/5 border border-amber-500/10 rounded-xl p-3 font-mono text-[11px] text-gray-400 leading-relaxed">
+                    <span class="text-amber-500 font-bold">System Manifest:</span> Ledger synchronization complete. Capital changes matching the core relational matrix have been synchronized between local node pools.
+                </div>
+            </div>
+
+            <div class="p-4 bg-gray-900/40 border-t border-gray-900 flex justify-end">
+                <button onclick="closeReceiptModal()" class="bg-amber-500 hover:bg-amber-400 text-gray-950 font-black text-xs px-6 py-2.5 rounded-xl uppercase tracking-wider transition">Acknowledge Manifest</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── MAIN APP WORKSPACE ──────────────────────────────────────────── -->
     <div id="appWorkspace" class="hidden">
         <header class="border-b border-gray-800 bg-gray-950 p-4 sticky top-0 z-40 shadow-md">
             <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -72,6 +137,7 @@
 
     <script>
         const API_BASE = window.location.origin + "/api";
+        const PRICE_PER_SHARD = 2000000.00; 
         let currentSessionWallet = "";
         let currentSessionUser = "";
         let currentAuthMode = "login"; 
@@ -204,7 +270,7 @@
 
                         <div class="font-mono text-xs text-gray-400 mt-4 mb-4 flex justify-between items-center bg-gray-900/30 p-1.5 px-2.5 rounded-md border border-gray-900">
                             <span class="text-gray-500 text-[11px]">Value Matrix:</span>
-                            <span class="text-amber-500 font-black">${item.price_susd} SUSD</span>
+                            <span class="text-amber-500 font-black">${item.price_susd.toLocaleString()} SUSD</span>
                         </div>
                     </div>
 
@@ -263,22 +329,40 @@
                     return;
                 }
 
-                const senderAddress = actionType === "buy" ? "0x0A5AbC999e6880059B321496336BC173A1667AF0" : currentSessionWallet;
-                const receiverAddress = actionType === "buy" ? currentSessionWallet : recipientUser;
-                const currentTimestamp = new Date().toLocaleString();
+                // Map Wallets Based on Value Deduction Rules
+                const milarSystemEscrow = "0x0A5AbC999e6880059B321496336BC173A1667AF0";
+                let senderAddress, receiverAddress;
 
-                alert(
-                    `SEMHAL CRYPTOCURRENCY\n\n` +
-                    `Send full public address\n${senderAddress}\n\n` +
-                    `Receiver full public address\n${receiverAddress}\n\n` +
-                    `Amount transfer\n${size.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})} Shards\n\n` +
-                    `Date\n${currentTimestamp}`
-                );
+                if (actionType === "buy") {
+                    senderAddress = currentSessionWallet; 
+                    receiverAddress = milarSystemEscrow;
+                } else {
+                    senderAddress = currentSessionWallet;
+                    receiverAddress = recipientUser;
+                }
 
-                loadGridInventory(); 
+                // Populate and Trigger Attractive Custom Holographic Modal
+                document.getElementById("receiptDebitWallet").innerText = senderAddress;
+                document.getElementById("receiptCreditWallet").innerText = receiverAddress;
+                document.getElementById("receiptAmount").innerText = `${size.toLocaleString(undefined, {minimumFractionDigits: 2})} Shards`;
+                document.getElementById("receiptValue").innerText = `$${(size * PRICE_PER_SHARD).toLocaleString(undefined, {minimumFractionDigits: 2})} SUSD`;
+                document.getElementById("receiptTime").innerText = new Date().toLocaleString();
+                
+                const modal = document.getElementById("receiptModal");
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+
+                // CRITICAL FIX: Instantly sync and reload local position data inside the grid inventory view
+                await loadGridInventory(); 
             } catch (err) {
                 alert("❌ Gateway transmission error. Network pipeline timed out.");
             }
+        }
+
+        function closeReceiptModal() {
+            const modal = document.getElementById("receiptModal");
+            modal.classList.remove("flex");
+            modal.classList.add("hidden");
         }
 
         function terminateSession() {
