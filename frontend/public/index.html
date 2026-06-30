@@ -21,7 +21,6 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased">
 
-    <!-- ─── AUTHENTICATION OVERLAY ──────────────────────────────────────── -->
     <div id="authOverlay" class="fixed inset-0 bg-gray-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
         <div class="bg-gray-900 border border-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl">
             <div class="text-center mb-6">
@@ -54,7 +53,6 @@
         </div>
     </div>
 
-    <!-- ─── PREMIUM TRANSACTION MODAL (HIGH VISUAL ATTRACTIVENESS) ──────── -->
     <div id="receiptModal" class="fixed inset-0 bg-gray-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-all duration-300">
         <div class="bg-gray-950 border border-amber-500/30 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl holo-glow flex flex-col">
             <div class="h-[3px] w-full holo-border"></div>
@@ -68,7 +66,6 @@
                     <div class="text-right font-mono text-[10px] text-gray-500" id="receiptTime">00/00/0000, 00:00:00</div>
                 </div>
 
-                <!-- Balance Vector Pipeline Display -->
                 <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4 mb-4 space-y-3 font-mono text-xs">
                     <div class="flex justify-between items-center bg-gray-950/50 p-2.5 rounded-lg border border-red-500/10">
                         <span class="text-gray-400 text-[11px]">🔴 Debited (From Buyer):</span>
@@ -81,7 +78,6 @@
                     </div>
                 </div>
 
-                <!-- Data Field Grid -->
                 <div class="grid grid-cols-2 gap-3 font-mono text-xs mb-4">
                     <div class="bg-gray-900/40 p-3 rounded-xl border border-gray-800/60">
                         <div class="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Asset Tranche Size</div>
@@ -104,7 +100,6 @@
         </div>
     </div>
 
-    <!-- ─── MAIN APP WORKSPACE ──────────────────────────────────────────── -->
     <div id="appWorkspace" class="hidden">
         <header class="border-b border-gray-800 bg-gray-950 p-4 sticky top-0 z-40 shadow-md">
             <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -142,6 +137,25 @@
         let currentSessionUser = "";
         let currentAuthMode = "login"; 
         let localCacheMatrix = [];
+
+        // Run checking sequence immediately upon browser compilation loading
+        window.addEventListener("DOMContentLoaded", () => {
+            const persistedWallet = localStorage.getItem("semhal_session_wallet");
+            const persistedUser = localStorage.getItem("semhal_session_user");
+
+            if (persistedWallet && persistedUser) {
+                currentSessionWallet = persistedWallet;
+                currentSessionUser = persistedUser;
+                
+                document.getElementById("activeUserDisplay").innerText = currentSessionUser;
+                document.getElementById("activeWalletDisplay").innerText = currentSessionWallet;
+                
+                document.getElementById("authOverlay").classList.add("hidden");
+                document.getElementById("appWorkspace").classList.remove("hidden");
+                
+                loadGridInventory();
+            }
+        });
 
         function toggleAuthMode(mode) {
             currentAuthMode = mode;
@@ -216,6 +230,10 @@
 
                 currentSessionWallet = wallet;
                 currentSessionUser = contact;
+
+                // Lock keys securely to persistent browser storage
+                localStorage.setItem("semhal_session_wallet", currentSessionWallet);
+                localStorage.setItem("semhal_session_user", currentSessionUser);
                 
                 document.getElementById("activeUserDisplay").innerText = currentSessionUser;
                 document.getElementById("activeWalletDisplay").innerText = currentSessionWallet;
@@ -329,7 +347,6 @@
                     return;
                 }
 
-                // Map Wallets Based on Value Deduction Rules
                 const milarSystemEscrow = "0x0A5AbC999e6880059B321496336BC173A1667AF0";
                 let senderAddress, receiverAddress;
 
@@ -341,7 +358,6 @@
                     receiverAddress = recipientUser;
                 }
 
-                // Populate and Trigger Attractive Custom Holographic Modal
                 document.getElementById("receiptDebitWallet").innerText = senderAddress;
                 document.getElementById("receiptCreditWallet").innerText = receiverAddress;
                 document.getElementById("receiptAmount").innerText = `${size.toLocaleString(undefined, {minimumFractionDigits: 2})} Shards`;
@@ -352,7 +368,6 @@
                 modal.classList.remove("hidden");
                 modal.classList.add("flex");
 
-                // CRITICAL FIX: Instantly sync and reload local position data inside the grid inventory view
                 await loadGridInventory(); 
             } catch (err) {
                 alert("❌ Gateway transmission error. Network pipeline timed out.");
@@ -368,6 +383,11 @@
         function terminateSession() {
             currentSessionWallet = "";
             currentSessionUser = "";
+            
+            // Wipe tokens clear on explicit manual logouts
+            localStorage.removeItem("semhal_session_wallet");
+            localStorage.removeItem("semhal_session_user");
+
             document.getElementById("authOverlay").classList.remove("hidden");
             document.getElementById("appWorkspace").classList.add("hidden");
         }
