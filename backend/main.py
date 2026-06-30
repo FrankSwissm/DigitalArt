@@ -17,7 +17,6 @@ TIERS_PATH = os.path.join(BASE_DIR, "config", "user_tiers.json")
 # ─── CORE INTEGRATION CONFIGURATIONS ─────────────────────────────────
 SEMHAL_ECOSYSTEM_URL = "https://semhal-crypto.onrender.com"
 TARGET_WALLET = "0x0A5AbC999e6880059B321496336BC173A1667AF0"
-DEDICATED_PROFILE_WALLET = "0x40FC3CA4Ce11Ff9DD60E632478528cE23BFa8Ab3"
 
 # ─── NEON DATABASE CONNECTION ────────────────────────────────────────
 # Fetches your connection string directly from Render's Environment Variables
@@ -142,11 +141,8 @@ def get_ledger():
         item["price_susd"] = PRICE_PER_SHARD
         base_shards = calculated_balances.get(str(item["id"]), 0.0)
         
-        # Injects the target offset directly for your dedicated portfolio signature address
-        if wallet.lower() == DEDICATED_PROFILE_WALLET.lower():
-            item["user_owned_shards"] = base_shards + SHARDS_SOLD_PER_DEITY
-        else:
-            item["user_owned_shards"] = base_shards
+        # Consistent mapping directly out of transactional inputs
+        item["user_owned_shards"] = base_shards
         
     return jsonify(matrix)
 
