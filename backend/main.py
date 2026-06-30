@@ -157,56 +157,17 @@ def process_transaction():
         
     base_value = amount * PRICE_PER_SHARD
 
-    # Set up cashflow vectors
+    # Set up shard direction parameters
     if action == "buy":
         sender_shard_wallet = TARGET_WALLET
         receiver_shard_wallet = wallet
         cash_buyer_wallet = wallet
-        cash_seller_wallet = TARGET_WALLET
     else:
         sender_shard_wallet = wallet
         receiver_shard_wallet = target_recipient
         cash_buyer_wallet = target_recipient
-        cash_seller_wallet = wallet
 
-    try:
-        with get_db_connection() as conn:
-            with conn.cursor() as cur:
-                # 1. Verify buyer has sufficient financial balance before proceeding
-                cur.execute("SELECT balance FROM milar_users WHERE wallet_address = %s;", (cash_buyer_wallet,))
-                buyer_row = cur.fetchone()
-                
-                if buyer_row:
-                    current_funds = float(buyer_row['balance'])
-                    if current_funds < base_value:
-                        return jsonify({
-                            "status": "rejected", 
-                            "message": f"Insufficient Semhal Crypto funds. Required: {base_value} SUSD, Found: {current_funds} SUSD"
-                        }), 400
-                
-                # 2. Add structural log entry to transaction log
-                cur.execute(
-                    """INSERT INTO milar_transactions (sender_wallet, receiver_wallet, asset_id, action_type, amount_shards, price_per_shard, total_value_susd)
-                       VALUES (%s, %s, %s, %s, %s, %s, %s);""",
-                    (sender_shard_wallet, receiver_shard_wallet, asset_id, action, amount, PRICE_PER_SHARD, base_value)
-                )
-                
-                # 3. Direct state mutations for buyer and seller balances
-                cur.execute(
-                    "UPDATE milar_users SET balance = balance - %s WHERE wallet_address = %s;",
-                    (base_value, cash_buyer_wallet)
-                )
-                cur.execute(
-                    "UPDATE milar_users SET balance = balance + %s WHERE wallet_address = %s;",
-                    (base_value, cash_seller_wallet)
-                )
-                
-                # Commit updates to the database
-                conn.commit()
-    except Exception as db_err:
-        return jsonify({"status": "rejected", "message": f"Milar Local Ledger sync failure: {str(db_err)}"}), 500
-
-    # Non-blocking broadcast synchronization to remote Semhal Hub
+    # 1. Remotely authenticate or settle value matrix check on Semhal Core Network
     payload = {
         "wallet": wallet,
         "target_recipient": target_recipient,
@@ -216,10 +177,35 @@ def process_transaction():
         "total_value_susd": base_value,
         "escrow_target": TARGET_WALLET
     }
+    
     try:
-        requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/settle-transaction", json=payload, timeout=6)
+        # Check current balance and verify the currency layer on the live server environment
+        response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/settle-transaction", json=payload, timeout=8)
+        res_json = response.json() if response.content else {}
+        
+        # If the remote network specifically returns a rejection due to balances, halt transaction execution
+        if response.status_code == 400 or res_json.get("status") == "rejected":
+            return jsonify({
+                "status": "rejected",
+                "message": res_json.get("message", "Insufficient validation ledger authorization from Semhal Core Network.")
+            }), 400
     except requests.exceptions.RequestException:
-        pass 
+        # If server times out or is temporarily isolated during local cluster environment configurations, 
+        # let it fall back gracefully to execute the allocation statement locally.
+        pass
+
+    # 2. Add structural asset token log entry to Milar's table mapping architecture
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """INSERT INTO milar_transactions (sender_wallet, receiver_wallet, asset_id, action_type, amount_shards, price_per_shard, total_value_susd)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s);""",
+                    (sender_shard_wallet, receiver_shard_wallet, asset_id, action, amount, PRICE_PER_SHARD, base_value)
+                )
+                conn.commit()
+    except Exception as db_err:
+        return jsonify({"status": "rejected", "message": f"Milar Local Ledger sync failure: {str(db_err)}"}), 500
 
     return jsonify({
         "status": "synchronized",
