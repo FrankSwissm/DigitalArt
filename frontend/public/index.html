@@ -115,7 +115,6 @@
                 return;
             }
 
-            // Client-side guard checking for the exact requested registration format bounds
             if (currentAuthMode === "register") {
                 if (!wallet.startsWith("0x") || wallet.length < 42) {
                     alert("🚨 Registration Halted: You must input your exact Semhal cryptocurrency public wallet address (starting with 0x).");
@@ -149,7 +148,6 @@
                     alert("Account registration broadcast accepted! Proceeding to initialize session.");
                 }
 
-                // Initialize authenticated profile views
                 currentSessionWallet = wallet;
                 currentSessionUser = contact;
                 
@@ -185,7 +183,7 @@
             grid.innerHTML = ""; 
 
             assets.forEach(item => {
-                const ownedCount = item.user_owned_shards || 0;
+                const ownedCount = parseFloat(item.user_owned_shards) || 0;
                 const card = document.createElement("div");
                 card.className = "p-5 rounded-xl border border-gray-800 bg-gray-950 flex flex-col justify-between hover:border-gray-700 transition duration-150 shadow-lg";
                 
@@ -199,7 +197,9 @@
                         
                         <div class="mt-3 bg-gray-900 border border-gray-800 p-2.5 rounded-lg flex justify-between items-center">
                             <span class="text-xs text-gray-400">Position:</span>
-                            <span class="text-xs font-mono font-bold ${ownedCount > 0 ? 'text-emerald-400 font-black' : 'text-gray-600'}">${ownedCount.toLocaleString()} Shards</span>
+                            <span class="text-xs font-mono font-bold ${ownedCount > 0 ? 'text-emerald-400 font-black' : 'text-gray-600'}">
+                                ${ownedCount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})} Shards
+                            </span>
                         </div>
 
                         <div class="font-mono text-xs text-gray-400 mt-4 mb-4 flex justify-between items-center bg-gray-900/30 p-1.5 px-2.5 rounded-md border border-gray-900">
@@ -231,7 +231,7 @@
         }
 
         async function executeTrade(assetId, actionType) {
-            const size = parseInt(document.getElementById(`qty-${assetId}`).value);
+            const size = parseFloat(document.getElementById(`qty-${assetId}`).value);
             let recipientUser = "";
 
             if (actionType === "sell") {
@@ -263,17 +263,15 @@
                     return;
                 }
 
-                // Enforce exact structural parameters for confirmation output layout
                 const senderAddress = actionType === "buy" ? "0x0A5AbC999e6880059B321496336BC173A1667AF0" : currentSessionWallet;
                 const receiverAddress = actionType === "buy" ? currentSessionWallet : recipientUser;
                 const currentTimestamp = new Date().toLocaleString();
 
-                // Intercept execution and generate the clean requested text receipt layout directly
                 alert(
                     `SEMHAL CERYPTOCURRENCY\n\n` +
                     `Send full public address\n${senderAddress}\n\n` +
                     `Reciver full public address\n${receiverAddress}\n\n` +
-                    `Amout transfer\n${size.toLocaleString()} Shards\n\n` +
+                    `Amout transfer\n${size.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})} Shards\n\n` +
                     `Date\n${currentTimestamp}`
                 );
 
