@@ -196,7 +196,7 @@ def process_transaction():
             with conn.cursor() as cur:
                 cur.execute(
                     """INSERT INTO milar_transactions (sender_wallet, receiver_wallet, asset_id, action_type, amount_shards, price_per_shard, total_value_susd)
-                       VALUES (%s, %s, %s, %s, %s, %s);""",
+                       VALUES (%s, %s, %s, %s, %s, %s, %s);""",
                     (sender_shard_wallet, receiver_shard_wallet, asset_id, action, amount, PRICE_PER_SHARD, base_value)
                 )
                 conn.commit()
