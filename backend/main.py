@@ -24,16 +24,9 @@ NEON_DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://user:password@n
 def get_db_connection():
     return psycopg.connect(NEON_DATABASE_URL, row_factory=dict_row)
 
-# ─── RE-CALIBRATED ECONOMIC PARAMETERS (US$2 QUADRILLION BASIS) ──────
+# ─── ECONOMIC PARAMETERS ─────────────────────────────────────────────
 TOTAL_SHARDS = 1000000000              
-TOTAL_PRICE_USD = 2000000000000000     
 PRICE_PER_SHARD = 2000000.00           
-
-SOLD_SHARDS = 86866200
-REMAINING_SHARDS = TOTAL_SHARDS - SOLD_SHARDS  
-DEITY_COUNT = 101
-SHARDS_PER_DEITY = REMAINING_SHARDS / DEITY_COUNT 
-SHARDS_SOLD_PER_DEITY = SOLD_SHARDS / DEITY_COUNT
 
 def load_json_file(path, default_factory):
     if os.path.exists(path):
@@ -46,7 +39,7 @@ def load_json_file(path, default_factory):
 def serve_frontend():
     return send_from_directory(app.static_folder, "index.html")
 
-# ─── AUTHENTICATION FLOWS ────────────────────────────────────────────
+# ─── AUTHENTICATION PROXIES ──────────────────────────────────────────
 @app.route("/api/auth/register", methods=["POST"])
 def proxy_register():
     data = request.json or {}
@@ -68,36 +61,26 @@ def proxy_register():
     except Exception as db_err:
         print("Milar local user storage trace warning:", db_err)
 
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/register", json=data, timeout=12)
-            return jsonify(response.json()), response.status_code
-        except requests.exceptions.RequestException:
-            if attempt < max_retries - 1:
-                time.sleep(3)
-                continue
-            return jsonify({
-                "status": "success",
-                "message": "Local Milar node synchronized. Registration bypassed successfully during remote cold-start."
-            }), 200
+    try:
+        response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/register", json=data, timeout=12)
+        return jsonify(response.json()), response.status_code
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "status": "success",
+            "message": "Local Milar node synchronized. Registration bypassed during remote cold-start."
+        }), 200
 
 @app.route("/api/auth/login", methods=["POST"])
 def proxy_login():
     data = request.json or {}
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/login", json=data, timeout=12)
-            return jsonify(response.json()), response.status_code
-        except requests.exceptions.RequestException:
-            if attempt < max_retries - 1:
-                time.sleep(3)
-                continue
-            return jsonify({
-                "status": "success",
-                "message": "Local Milar ledger session established successfully via cold-start proxy bypass."
-            }), 200
+    try:
+        response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/login", json=data, timeout=12)
+        return jsonify(response.json()), response.status_code
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "status": "success",
+            "message": "Local Milar ledger session established successfully via cold-start proxy bypass."
+        }), 200
 
 @app.route("/api/auth/reset", methods=["POST"])
 def proxy_reset():
@@ -113,7 +96,6 @@ def proxy_reset():
 def get_ledger():
     matrix = load_json_file(MATRIX_PATH, list)
     wallet = request.args.get("wallet", "").strip()
-    
     calculated_balances = {}
     
     if wallet:
@@ -137,12 +119,11 @@ def get_ledger():
 
     for item in matrix:
         item["price_susd"] = PRICE_PER_SHARD
-        base_shards = calculated_balances.get(str(item["id"]), 0.0)
-        item["user_owned_shards"] = base_shards
+        item["user_owned_shards"] = calculated_balances.get(str(item["id"]), 0.0)
         
     return jsonify(matrix)
 
-# ─── MUTABLE TRANSACTION SETTLEMENT PIPELINE ──────────────────────────
+# ─── MUTABLE CROSS-SYSTEM SETTLEMENT PIPELINE ──────────────────────────
 @app.route("/api/transaction", methods=["POST"])
 def process_transaction():
     data = request.json or {}
@@ -157,17 +138,15 @@ def process_transaction():
         
     base_value = amount * PRICE_PER_SHARD
 
-    # Set up shard direction parameters
+    # Set up structural shard routing profiles
     if action == "buy":
         sender_shard_wallet = TARGET_WALLET
         receiver_shard_wallet = wallet
-        cash_buyer_wallet = wallet
     else:
         sender_shard_wallet = wallet
         receiver_shard_wallet = target_recipient
-        cash_buyer_wallet = target_recipient
 
-    # 1. Remotely authenticate or settle value matrix check on Semhal Core Network
+    # 1. Instruct Semhal Core System to mutate the currency ledger balances
     payload = {
         "wallet": wallet,
         "target_recipient": target_recipient,
@@ -175,26 +154,27 @@ def process_transaction():
         "asset_id": asset_id,
         "amount": amount,
         "total_value_susd": base_value,
-        "escrow_target": TARGET_WALLET
+        "milar_system_escrow": TARGET_WALLET
     }
     
     try:
-        # Check current balance and verify the currency layer on the live server environment
-        response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/settle-transaction", json=payload, timeout=8)
+        # Hits Semhal endpoint to verify balance, deduct from user, and credit Milar Escrow account
+        response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/settle-transaction", json=payload, timeout=15)
         res_json = response.json() if response.content else {}
         
-        # If the remote network specifically returns a rejection due to balances, halt transaction execution
-        if response.status_code == 400 or res_json.get("status") == "rejected":
+        if response.status_code != 200 or res_json.get("status") == "rejected":
             return jsonify({
                 "status": "rejected",
-                "message": res_json.get("message", "Insufficient validation ledger authorization from Semhal Core Network.")
+                "message": res_json.get("message", "Transaction rejected: Semhal Core reported insufficient funds or failed balance modification.")
             }), 400
-    except requests.exceptions.RequestException:
-        # If server times out or is temporarily isolated during local cluster environment configurations, 
-        # let it fall back gracefully to execute the allocation statement locally.
-        pass
+            
+    except requests.exceptions.RequestException as err:
+        return jsonify({
+            "status": "rejected",
+            "message": f"Critical Error: Unable to communicate with Semhal Core System to deduct balances. {str(err)}"
+        }), 503
 
-    # 2. Add structural asset token log entry to Milar's table mapping architecture
+    # 2. Add structural token shard allocation log entry to Milar's table matrix
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
@@ -205,11 +185,14 @@ def process_transaction():
                 )
                 conn.commit()
     except Exception as db_err:
-        return jsonify({"status": "rejected", "message": f"Milar Local Ledger sync failure: {str(db_err)}"}), 500
+        return jsonify({
+            "status": "rejected", 
+            "message": f"Milar Local Ledger sync failure after Semhal deduction: {str(db_err)}. Check system logs immediately."
+        }), 500
 
     return jsonify({
         "status": "synchronized",
-        "message": "Asset transaction settled successfully on local Milar matrix ledger."
+        "message": "Transaction verified and executed successfully. Semhal balance shifted; Milar shards allocated."
     })
 
 if __name__ == "__main__":
