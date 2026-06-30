@@ -26,10 +26,10 @@ NEON_DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://user:password@n
 def get_db_connection():
     return psycopg.connect(NEON_DATABASE_URL, row_factory=dict_row)
 
-# ─── RE-CALIBRATED ECONOMIC PARAMETERS ───────────────────────────────
+# ─── RE-CALIBRATED ECONOMIC PARAMETERS (US$2 QUADRILLION BASIS) ──────
 TOTAL_SHARDS = 1000000000              
-TOTAL_PRICE_USD = 1000000000000         
-PRICE_PER_SHARD = 1000.00               
+TOTAL_PRICE_USD = 2000000000000000     # US$2 Quadrillion Global Capital Pool Matrix
+PRICE_PER_SHARD = 2000000.00           # Recalibrated unit baseline price ($2 Million SUSD per Shard)
 
 SOLD_SHARDS = 86866200
 REMAINING_SHARDS = TOTAL_SHARDS - SOLD_SHARDS  
