@@ -19,7 +19,6 @@ SEMHAL_ECOSYSTEM_URL = "https://semhal-crypto.onrender.com"
 TARGET_WALLET = "0x0A5AbC999e6880059B321496336BC173A1667AF0"
 
 # ─── NEON DATABASE CONNECTION ────────────────────────────────────────
-# Fetches your connection string directly from Render's Environment Variables
 NEON_DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://user:password@neon-host/dbname?sslmode=require")
 
 def get_db_connection():
@@ -27,8 +26,8 @@ def get_db_connection():
 
 # ─── RE-CALIBRATED ECONOMIC PARAMETERS (US$2 QUADRILLION BASIS) ──────
 TOTAL_SHARDS = 1000000000              
-TOTAL_PRICE_USD = 2000000000000000     # US$2 Quadrillion Global Capital Pool Matrix
-PRICE_PER_SHARD = 2000000.00           # Recalibrated unit baseline price ($2 Million SUSD per Shard)
+TOTAL_PRICE_USD = 2000000000000000     
+PRICE_PER_SHARD = 2000000.00           
 
 SOLD_SHARDS = 86866200
 REMAINING_SHARDS = TOTAL_SHARDS - SOLD_SHARDS  
@@ -58,7 +57,6 @@ def proxy_register():
     if not wallet or not wallet.startswith("0x") or len(wallet) < 42:
         return jsonify({"status": "error", "message": "Malformed public address signature."}), 400
 
-    # Save user identity profile natively inside your local database store
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
@@ -140,8 +138,6 @@ def get_ledger():
     for item in matrix:
         item["price_susd"] = PRICE_PER_SHARD
         base_shards = calculated_balances.get(str(item["id"]), 0.0)
-        
-        # Consistent mapping directly out of transactional inputs
         item["user_owned_shards"] = base_shards
         
     return jsonify(matrix)
@@ -161,23 +157,56 @@ def process_transaction():
         
     base_value = amount * PRICE_PER_SHARD
 
-    sender = TARGET_WALLET if action == "buy" else wallet
-    receiver = wallet if action == "buy" else target_recipient
+    # Set up cashflow vectors
+    if action == "buy":
+        sender_shard_wallet = TARGET_WALLET
+        receiver_shard_wallet = wallet
+        cash_buyer_wallet = wallet
+        cash_seller_wallet = TARGET_WALLET
+    else:
+        sender_shard_wallet = wallet
+        receiver_shard_wallet = target_recipient
+        cash_buyer_wallet = target_recipient
+        cash_seller_wallet = wallet
 
-    # Commit trade vectors directly inside the persistent Neon engine
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
+                # 1. Verify buyer has sufficient financial balance before proceeding
+                cur.execute("SELECT balance FROM milar_users WHERE wallet_address = %s;", (cash_buyer_wallet,))
+                buyer_row = cur.fetchone()
+                
+                if buyer_row:
+                    current_funds = float(buyer_row['balance'])
+                    if current_funds < base_value:
+                        return jsonify({
+                            "status": "rejected", 
+                            "message": f"Insufficient Semhal Crypto funds. Required: {base_value} SUSD, Found: {current_funds} SUSD"
+                        }), 400
+                
+                # 2. Add structural log entry to transaction log
                 cur.execute(
                     """INSERT INTO milar_transactions (sender_wallet, receiver_wallet, asset_id, action_type, amount_shards, price_per_shard, total_value_susd)
                        VALUES (%s, %s, %s, %s, %s, %s, %s);""",
-                    (sender, receiver, asset_id, action, amount, PRICE_PER_SHARD, base_value)
+                    (sender_shard_wallet, receiver_shard_wallet, asset_id, action, amount, PRICE_PER_SHARD, base_value)
                 )
+                
+                # 3. Direct state mutations for buyer and seller balances
+                cur.execute(
+                    "UPDATE milar_users SET balance = balance - %s WHERE wallet_address = %s;",
+                    (base_value, cash_buyer_wallet)
+                )
+                cur.execute(
+                    "UPDATE milar_users SET balance = balance + %s WHERE wallet_address = %s;",
+                    (base_value, cash_seller_wallet)
+                )
+                
+                # Commit updates to the database
                 conn.commit()
     except Exception as db_err:
         return jsonify({"status": "rejected", "message": f"Milar Local Ledger sync failure: {str(db_err)}"}), 500
 
-    # Non-blocking broadcast synchronization to the Semhal Hub network layer
+    # Non-blocking broadcast synchronization to remote Semhal Hub
     payload = {
         "wallet": wallet,
         "target_recipient": target_recipient,
@@ -188,7 +217,7 @@ def process_transaction():
         "escrow_target": TARGET_WALLET
     }
     try:
-        requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/settle-transaction", json=payload, timeout=4)
+        requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/settle-transaction", json=payload, timeout=6)
     except requests.exceptions.RequestException:
         pass 
 
