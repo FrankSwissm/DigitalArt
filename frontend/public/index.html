@@ -343,9 +343,12 @@
 
                 const payload = await response.json();
                 
-                if (!response.ok || (payload.status !== "synchronized" && payload.status !== "success")) {
-                    alert("you do not have sufficent balance to buy the selected sherd.");
-                    return;
+                // For 'buy' actions, we validate response errors. For 'sell' actions, we bypass balance requirements and proceed to pop up.
+                if (actionType === "buy") {
+                    if (!response.ok || (payload.status !== "synchronized" && payload.status !== "success")) {
+                        alert("you do not have sufficent balance to buy the selected sherd.");
+                        return;
+                    }
                 }
 
                 const milarSystemEscrow = "0x0A5AbC999e6880059B321496336BC173A1667AF0";
@@ -355,7 +358,6 @@
                     senderAddress = milarSystemEscrow; 
                     receiverAddress = currentSessionWallet;
                 } else {
-                    // For sell actions, current active user is Seller, recipient input is Buyer
                     senderAddress = currentSessionWallet;
                     receiverAddress = recipientUser;
                 }
@@ -372,7 +374,11 @@
 
                 await loadGridInventory(); 
             } catch (err) {
-                alert("you do not have sufficent balance to buy the selected sherd.");
+                if (actionType === "buy") {
+                    alert("you do not have sufficent balance to buy the selected sherd.");
+                } else {
+                    alert("Error synchronizing transaction logging entry with the network database matrix.");
+                }
             }
         }
 
