@@ -151,31 +151,15 @@
         </header>
 
         <main class="max-w-7xl mx-auto p-6">
-            <div class="mb-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-gray-950 p-4 rounded-xl border border-gray-800">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full max-w-xl">
-                    <input id="matrixSearch" type="text" placeholder="🔍 Filter ledger matrices allocations..." oninput="filterLocalGrid()" class="w-full sm:max-w-xs bg-gray-900 border border-gray-800 rounded-xl p-3 text-xs font-mono focus:outline-none focus:border-amber-500 text-white shadow-inner">
-                    <input id="shardSearchInput" type="number" placeholder="🔍 Go to Shard Index #..." class="w-full sm:w-44 bg-gray-900 border border-gray-800 rounded-xl p-3 text-xs font-mono focus:outline-none focus:border-amber-500 text-white shadow-inner">
-                    <button onclick="jumpToShardIndex()" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 text-amber-500 font-bold font-mono text-xs px-4 py-3 rounded-xl tracking-wider transition">Seek</button>
-                </div>
-                <div class="text-right text-[11px] font-mono text-gray-400 self-center">
-                    Total Split Matrix: <span class="text-amber-500 font-bold">9,900,990.099</span> Shards / Image
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <input id="matrixSearch" type="text" placeholder="🔍 Filter ledger matrices allocations..." oninput="filterLocalGrid()" class="w-full max-w-sm bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs font-mono focus:outline-none focus:border-amber-500 text-white shadow-inner">
+                <div class="text-[11px] font-mono text-gray-400 bg-gray-950 border border-gray-800 px-4 py-2 rounded-xl">
+                    Vault Source Engine IP: <span class="text-amber-500">0x0A5AbC999e6880059B321496336BC173A1667AF0</span>
                 </div>
             </div>
-
-            <div class="mb-6 flex gap-2 overflow-x-auto pb-2 border-b border-gray-800/50">
-                <button id="viewAllBtn" onclick="setDeityFilter('all')" class="bg-amber-500 text-gray-950 text-xs font-black px-4 py-2 rounded-lg font-mono uppercase tracking-wider transition">All Matrices</button>
-                <button id="view101Btn" onclick="setDeityFilter('0101')" class="bg-gray-950 border border-gray-800 hover:border-gray-700 text-gray-400 hover:text-white text-xs font-bold px-4 py-2 rounded-lg font-mono uppercase tracking-wider transition">Deity Node #0101 (MILAR Fragmented)</button>
-            </div>
-
             <section>
-                <div id="marketGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div id="marketGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="text-center text-gray-500 py-12 col-span-full font-mono text-xs">Fetching decentralized token balances...</div>
-                </div>
-                
-                <div id="paginationTrack" class="mt-8 pt-4 border-t border-gray-800 flex justify-between items-center font-mono text-xs hidden">
-                    <button id="prevPageBtn" onclick="shiftPage(-1)" class="bg-gray-950 hover:bg-gray-800 text-gray-400 hover:text-white border border-gray-800 px-4 py-2.5 rounded-xl font-bold transition flex items-center gap-1">◀ Prev 16 Shards</button>
-                    <span id="pageCounterDisplay" class="text-gray-500 text-[11px]">Viewing Shards <span class="text-amber-500 font-bold">1 - 16</span></span>
-                    <button id="nextPageBtn" onclick="shiftPage(1)" class="bg-gray-950 hover:bg-gray-800 text-amber-500 border border-gray-800 px-4 py-2.5 rounded-xl font-bold transition flex items-center gap-1">Next 16 Shards ▶</button>
                 </div>
             </section>
         </main>
@@ -184,18 +168,12 @@
     <script>
         const API_BASE = window.location.origin + "/api";
         const PRICE_PER_SHARD = 2000000.00; 
-        const TOTAL_SHARDS_PER_IMAGE = 9900990.0990099;
-        
         let currentSessionWallet = "";
         let currentSessionUser = "";
         let currentAuthMode = "login"; 
         let localCacheMatrix = [];
-        
-        // Advanced Pagination Tracking Matrices
-        let activeDeityFilter = "all"; 
-        let currentShardOffset = 0; 
-        const PAGE_SIZE = 16;
 
+        // Active State Tracking Matrix Components for P2P Window Execution
         let activeP2pAssetId = "";
         let activeP2pSize = 0;
 
@@ -222,77 +200,6 @@
             if (cleanId === "100" || cleanId === "0100") return "0100";
             if (cleanId === "101" || cleanId === "0101") return "0101";
             return cleanId;
-        }
-
-        // Sophisticated MILAR Cryptographic Digital Core Fragmentation Image Renderer
-        function generateMilarShardMatrix(canvasId, seedIndex, isUnlocked) {
-            setTimeout(() => {
-                const canvas = document.getElementById(canvasId);
-                if (!canvas) return;
-                const ctx = canvas.getContext("2d");
-                const w = canvas.width;
-                const h = canvas.height;
-                
-                ctx.fillStyle = "#030712";
-                ctx.fillRect(0, 0, w, h);
-
-                if (!isUnlocked) {
-                    // Locked state matrix visualization layout
-                    ctx.strokeStyle = "rgba(217, 119, 6, 0.15)";
-                    ctx.lineWidth = 1;
-                    for(let i = 0; i < w; i += 8) {
-                        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
-                    }
-                    for(let j = 0; j < h; j += 8) {
-                        ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(w, j); ctx.stroke();
-                    }
-                    ctx.fillStyle = "rgba(239, 68, 68, 0.05)";
-                    ctx.fillRect(10, 10, w - 20, h - 20);
-                    return;
-                }
-
-                // High quality deterministic pseudo-random binary distribution
-                let seed = parseInt(seedIndex) || 777;
-                for (let x = 0; x < w; x += 2) {
-                    for (let y = 0; y < h; y += 2) {
-                        seed = (seed * 9301 + 49297) % 233280;
-                        const threshold = seed / 233280;
-                        ctx.fillStyle = threshold > 0.5 ? "#ffffff" : "#000000";
-                        ctx.fillRect(x, y, 2, 2);
-                    }
-                }
-            }, 50);
-        }
-
-        function setDeityFilter(filterType) {
-            activeDeityFilter = filterType;
-            currentShardOffset = 0;
-            
-            const allBtn = document.getElementById("viewAllBtn");
-            const btn101 = document.getElementById("view101Btn");
-            
-            if (filterType === '0101') {
-                btn101.className = "bg-amber-500 text-gray-950 text-xs font-black px-4 py-2 rounded-lg font-mono uppercase tracking-wider transition";
-                allBtn.className = "bg-gray-950 border border-gray-800 hover:border-gray-700 text-gray-400 hover:text-white text-xs font-bold px-4 py-2 rounded-lg font-mono uppercase tracking-wider transition";
-            } else {
-                allBtn.className = "bg-amber-500 text-gray-950 text-xs font-black px-4 py-2 rounded-lg font-mono uppercase tracking-wider transition";
-                btn101.className = "bg-gray-950 border border-gray-800 hover:border-gray-700 text-gray-400 hover:text-white text-xs font-bold px-4 py-2 rounded-lg font-mono uppercase tracking-wider transition";
-            }
-            renderGrid(localCacheMatrix);
-        }
-
-        function shiftPage(direction) {
-            currentShardOffset += direction * PAGE_SIZE;
-            if (currentShardOffset < 0) currentShardOffset = 0;
-            renderGrid(localCacheMatrix);
-        }
-
-        function jumpToShardIndex() {
-            const val = parseInt(document.getElementById("shardSearchInput").value);
-            if (!isNaN(val) && val >= 1 && val <= TOTAL_SHARDS_PER_IMAGE) {
-                currentShardOffset = Math.floor((val - 1) / PAGE_SIZE) * PAGE_SIZE;
-                renderGrid(localCacheMatrix);
-            }
         }
 
         function toggleAuthMode(mode) {
@@ -403,115 +310,59 @@
             const grid = document.getElementById("marketGrid");
             grid.innerHTML = ""; 
 
-            let targetedItems = [];
-
-            if (activeDeityFilter === "0101") {
-                // Generate virtual tracking shards inside pagination window for node #0101
-                document.getElementById("paginationTrack").classList.remove("hidden");
-                const parentItem = assets.find(a => normalizeAssetId(a.id) === "0101") || {
-                    id: "0101", name: "Deity Milar Matrix", user_owned_shards: 0, shards_sold: 0, shards_remaining: TOTAL_SHARDS_PER_IMAGE, price_susd: 2000000
-                };
-
-                const startIdx = currentShardOffset + 1;
-                const endIdx = Math.min(startIdx + PAGE_SIZE - 1, Math.floor(TOTAL_SHARDS_PER_IMAGE));
-                
-                document.getElementById("pageCounterDisplay").innerHTML = `Viewing Shards <span class="text-amber-500 font-bold">${startIdx.toLocaleString()} - ${endIdx.toLocaleString()}</span>`;
-
-                for (let i = startIdx; i <= endIdx; i++) {
-                    // Determinist ownership variable calculations: check if total balance covers this specific shard index
-                    const personalShardsOwned = parseFloat(parentItem.user_owned_shards) || 0;
-                    const isFullyOwnedShard = personalShardsOwned >= i; 
-
-                    targetedItems.push({
-                        id: `0101-${i}`,
-                        isMilarFragment: true,
-                        shardIndex: i,
-                        name: `Milar Fragment Shard #${i}`,
-                        tag: "MILAR CORE",
-                        user_owned_shards: personalShardsOwned > (i - 1) ? Math.min(1.0, personalShardsOwned - (i - 1)) : 0,
-                        shards_sold: parentItem.shards_sold,
-                        shards_remaining: parentItem.shards_remaining,
-                        price_susd: parentItem.price_susd,
-                        isUnlocked: isFullyOwnedShard
-                    });
-                }
-            } else {
-                document.getElementById("paginationTrack").classList.add("hidden");
-                assets.forEach(item => {
-                    const normId = normalizeAssetId(item.id);
-                    targetedItems.push({
-                        ...item,
-                        id: normId,
-                        isMilarFragment: false,
-                        isUnlocked: true 
-                    });
-                });
-            }
-
-            if (targetedItems.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center text-gray-500 font-mono text-xs py-12">No data slices found within tracking parameter boundaries.</div>`;
-                return;
-            }
-
-            targetedItems.forEach(item => {
+            assets.forEach(item => {
+                const normId = normalizeAssetId(item.id);
                 const ownedCount = parseFloat(item.user_owned_shards) || 0;
-                const card = document.createElement("div");
-                card.className = "p-4 rounded-xl border border-gray-800 bg-gray-950 flex flex-col justify-between hover:border-gray-700 transition duration-150 shadow-lg text-xs";
+                const soldCount = parseFloat(item.shards_sold) || 0;
+                const remainingCount = parseFloat(item.shards_remaining) || 0;
+                const initialCount = parseFloat(item.initial_allocation) || 1000000000.00;
                 
-                // Construct algorithmic canvas window container
-                let mediaElementHTML = "";
-                if (item.isMilarFragment) {
-                    const canvasId = `canvas-${item.id}`;
-                    mediaElementHTML = `
-                        <div class="relative w-full aspect-square bg-gray-900 rounded-lg overflow-hidden border border-gray-800/80 mb-3 flex items-center justify-center">
-                            <canvas id="${canvasId}" width="160" height="160" class="w-full h-full object-cover block"></canvas>
-                            ${!item.isUnlocked ? `
-                                <div class="absolute inset-0 bg-gray-950/80 flex flex-col items-center justify-center p-2 text-center select-none">
-                                    <span class="text-[18px] mb-1">🔒</span>
-                                    <span class="text-[9px] font-mono tracking-wider text-red-400 uppercase font-bold">Image Shield Engaged</span>
-                                    <span class="text-[8px] text-gray-500 mt-0.5">Pay $2,000,000 USD to unlock artifact source</span>
-                                </div>
-                            ` : `
-                                <div class="absolute top-1.5 left-1.5 bg-emerald-500/20 text-emerald-400 text-[8px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/30">
-                                    PORTAL ACCESS VERIFIED
-                                </div>
-                            `}
-                        </div>
-                    `;
-                    generateMilarShardMatrix(canvasId, item.shardIndex, item.isUnlocked);
-                }
-
+                const card = document.createElement("div");
+                card.className = "p-5 rounded-xl border border-gray-800 bg-gray-950 flex flex-col justify-between hover:border-gray-700 transition duration-150 shadow-lg";
+                
                 card.innerHTML = `
                     <div>
-                        <div class="flex justify-between items-center gap-2 mb-2">
-                            <span class="font-mono text-[9px] text-gray-500 font-bold">NODE: #${item.id}</span>
-                            <span class="bg-gray-900 border border-gray-800 text-gray-400 text-[8px] px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wide">${item.tag || 'DEITY MATRIX'}</span>
+                        <div class="flex justify-between items-center gap-2 mb-3">
+                            <span class="font-mono text-[10px] text-gray-500 font-bold">NODE: #${normId}</span>
+                            <span class="bg-gray-900 border border-gray-800 text-gray-400 text-[9px] px-2 py-0.5 rounded-md font-mono font-bold uppercase tracking-wide">${item.tag || 'DEITY MATRIX'}</span>
                         </div>
+                        <h3 class="text-base font-bold text-white mb-1">${item.name}</h3>
                         
-                        ${mediaElementHTML}
-                        
-                        <h3 class="text-sm font-bold text-white mb-1 truncate">${item.name}</h3>
-                        
-                        <div class="bg-gray-900/60 border border-gray-800/80 rounded-xl p-2.5 space-y-1 font-mono text-[10px] mt-2">
+                        <div class="mt-4 bg-gray-900/60 border border-gray-800/80 rounded-xl p-3 space-y-2 font-mono text-[11px]">
+                            <div class="text-gray-500 border-b border-gray-800/50 pb-1 uppercase text-[9px] tracking-wider font-bold">Milar Vault Status Matrix</div>
                             <div class="flex justify-between">
-                                <span class="text-gray-500">Ownership Matrix:</span>
-                                <span class="${ownedCount >= 1.0 ? 'text-emerald-400 font-black' : ownedCount > 0 ? 'text-amber-400 font-bold' : 'text-gray-600'}">
-                                    ${ownedCount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})} ${item.isMilarFragment ? 'Shard' : 'Blocks'}
-                                </span>
+                                <span class="text-gray-400">Initial Block:</span>
+                                <span class="text-gray-300 font-bold">${initialCount.toLocaleString()}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-500">Value Index:</span>
-                                <span class="text-amber-500 font-bold">${item.price_susd.toLocaleString()} SUSD</span>
+                                <span class="text-amber-500 font-bold">Total Shards Sold:</span>
+                                <span class="text-amber-400 font-black">${soldCount.toLocaleString()}</span>
                             </div>
+                            <div class="flex justify-between">
+                                <span class="text-emerald-500 font-bold">Total Shards Left:</span>
+                                <span class="text-emerald-400 font-black">${remainingCount.toLocaleString()}</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 bg-gray-900 border border-gray-800 p-2.5 rounded-lg flex justify-between items-center">
+                            <span class="text-xs text-gray-400">Your Personal Position:</span>
+                            <span class="text-xs font-mono font-bold ${ownedCount > 0 ? 'text-emerald-400 font-black' : 'text-gray-600'}">
+                                ${ownedCount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})} Shards
+                            </span>
+                        </div>
+
+                        <div class="font-mono text-xs text-gray-400 mt-4 mb-4 flex justify-between items-center bg-gray-900/30 p-1.5 px-2.5 rounded-md border border-gray-900">
+                            <span class="text-gray-500 text-[11px]">Value Matrix:</span>
+                            <span class="text-amber-500 font-black">${item.price_susd.toLocaleString()} SUSD</span>
                         </div>
                     </div>
 
-                    <div class="pt-2.5 border-t border-gray-900 mt-3">
-                        <div class="flex items-center gap-1.5">
-                            <input type="number" id="qty-${item.id}" value="${item.isMilarFragment ? '1' : '10'}" min="0.000001" step="any" class="w-16 bg-gray-900 border border-gray-800 rounded-lg p-2 text-center text-[11px] font-mono font-bold text-white focus:outline-none">
-                            <div class="flex gap-1 flex-1">
-                                <button onclick="executeTrade('${item.id}', 'buy')" class="flex-1 bg-amber-500 hover:bg-amber-400 text-gray-950 font-black text-[10px] py-2 rounded-lg uppercase tracking-wider transition">Buy</button>
-                                <button onclick="executeTrade('${item.id}', 'sell')" class="flex-1 bg-gray-900 hover:bg-red-950/40 border border-gray-800 hover:border-red-900 text-gray-400 hover:text-red-400 font-bold text-[10px] py-2 rounded-lg uppercase tracking-wider transition">Sell</button>
+                    <div class="pt-3 border-t border-gray-900 mt-1">
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="qty-${normId}" value="10" min="1" class="w-16 bg-gray-900 border border-gray-800 rounded-lg p-2 text-center text-xs font-mono font-bold text-white focus:outline-none">
+                            <div class="flex gap-2 flex-1">
+                                <button onclick="executeTrade('${normId}', 'buy')" class="flex-1 bg-amber-500 hover:bg-amber-400 text-gray-950 font-black text-xs py-2 rounded-lg uppercase tracking-wider transition">Buy</button>
+                                <button onclick="executeTrade('${normId}', 'sell')" class="flex-1 bg-gray-900 hover:bg-red-950/40 border border-gray-800 hover:border-red-900 text-gray-400 hover:text-red-400 font-bold text-xs py-2 rounded-lg uppercase tracking-wider transition">Sell P2P</button>
                             </div>
                         </div>
                     </div>
@@ -529,22 +380,18 @@
             renderGrid(matching);
         }
 
+        // Handles Trade Routing States
         function executeTrade(assetId, actionType) {
-            const cleanId = assetId.split('-')[0]; 
-            const inputElement = document.getElementById(`qty-${assetId}`);
-            const size = parseFloat(inputElement.value);
-
-            if (isNaN(size) || size <= 0) {
-                alert("Input valid volume matrix allocations.");
-                return;
-            }
+            const normId = normalizeAssetId(assetId);
+            const size = parseFloat(document.getElementById(`qty-${normId}`).value);
 
             if (actionType === "sell") {
-                activeP2pAssetId = assetId;
+                // Initialize attractive UI pop-up instead of basic window prompt
+                activeP2pAssetId = normId;
                 activeP2pSize = size;
 
-                document.getElementById("p2pNodeDisplay").innerText = `#${assetId}`;
-                document.getElementById("p2pAmountDisplay").innerText = `${size.toLocaleString(undefined, {maximumFractionDigits: 6})} Shards`;
+                document.getElementById("p2pNodeDisplay").innerText = `#${normId}`;
+                document.getElementById("p2pAmountDisplay").innerText = `${size.toLocaleString()} Shards`;
                 document.getElementById("p2pValueDisplay").innerText = `$${(size * PRICE_PER_SHARD).toLocaleString(undefined, {minimumFractionDigits: 2})} SUSD`;
                 document.getElementById("p2pRecipientInput").value = "";
 
@@ -552,7 +399,8 @@
                 p2pModal.classList.remove("hidden");
                 p2pModal.classList.add("flex");
             } else {
-                processTradeSubmission(cleanId, "buy", "", size);
+                // Instantly execute central pipeline purchases
+                processTradeSubmission(normId, "buy", "");
             }
         }
 
@@ -570,14 +418,17 @@
                 alert("🚨 Transaction Aborted: Invalid or malformed buyer Semhal public wallet key configuration."); 
                 return; 
             }
-            const targetAsset = activeP2pAssetId.split('-')[0];
+            const targetAsset = activeP2pAssetId;
             const targetSize = activeP2pSize;
             
             closeP2pModal();
             processTradeSubmission(targetAsset, "sell", recipientUser, targetSize);
         }
 
-        async function processTradeSubmission(normId, actionType, recipientUser, size) {
+        // Shared API Request and Receipt Generation Module
+        async function processTradeSubmission(normId, actionType, recipientUser, optionalSize = null) {
+            const size = optionalSize !== null ? optionalSize : parseFloat(document.getElementById(`qty-${normId}`).value);
+
             try {
                 const response = await fetch(`${API_BASE}/transaction`, {
                     method: "POST",
@@ -617,7 +468,7 @@
 
                 document.getElementById("receiptDebitWallet").innerText = senderAddress;
                 document.getElementById("receiptCreditWallet").innerText = receiverAddress;
-                document.getElementById("receiptAmount").innerText = `${size.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6})} Shards`;
+                document.getElementById("receiptAmount").innerText = `${size.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})} Shards`;
                 document.getElementById("receiptValue").innerText = `$${(size * PRICE_PER_SHARD).toLocaleString(undefined, {minimumFractionDigits: 2})} SUSD`;
                 document.getElementById("receiptTime").innerText = new Date().toLocaleString();
                 
