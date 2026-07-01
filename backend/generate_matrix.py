@@ -35,7 +35,11 @@ def generate_kemet_matrix():
     # 3. Process iteration and inject standard $500 pricing model
     name_idx = 0
     for i in range(1, 102):
-        node_id = f"{i:03d}"
+        # Format 100 as '0100' and 101 as '0101', while preserving '001'-'099'
+        if i >= 100:
+            node_id = f"0{i}"
+        else:
+            node_id = f"{i:03d}"
         
         # Skip indices already secured by the Genesis deployment
         if node_id in matrix:
@@ -68,6 +72,7 @@ def generate_kemet_matrix():
             }
 
     # Sort matrix components sequentially by their structural ID
+    # Sorting ensures string comparison keeps '0100' and '0101' at the absolute bottom
     sorted_matrix = [dict({"id": k}, **v) for k, v in sorted(matrix.items())]
 
     # Ensure local directory config exists
