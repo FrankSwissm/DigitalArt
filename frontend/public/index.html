@@ -68,12 +68,12 @@
 
                 <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4 mb-4 space-y-3 font-mono text-xs">
                     <div class="flex justify-between items-center bg-gray-950/50 p-2.5 rounded-lg border border-red-500/10">
-                        <span class="text-gray-400 text-[11px]">🔴 Debited (From Buyer):</span>
+                        <span class="text-gray-400 text-[11px]">🔴 Debited (From Seller):</span>
                         <span id="receiptDebitWallet" class="text-red-400 font-bold truncate max-w-[200px] text-right">0x...</span>
                     </div>
                     <div class="flex justify-center my-1 text-amber-500/60 text-lg animate-pulse">👇 Mapping Liquidity Matrix Pool Pipeline 👇</div>
                     <div class="flex justify-between items-center bg-gray-950/50 p-2.5 rounded-lg border border-emerald-500/10">
-                        <span class="text-gray-400 text-[11px]">🟢 Credited (To Milar Node):</span>
+                        <span class="text-gray-400 text-[11px]">🟢 Credited (To Buyer):</span>
                         <span id="receiptCreditWallet" class="text-emerald-400 font-bold truncate max-w-[200px] text-right">0x...</span>
                     </div>
                 </div>
@@ -343,7 +343,7 @@
 
                 const payload = await response.json();
                 if (payload.status !== "synchronized" && payload.status !== "success") {
-                    alert(`🚨 Settlement Halted: ${payload.message}`);
+                    alert("you do not have sufficent balance to buy the selected sherd.");
                     return;
                 }
 
@@ -351,8 +351,8 @@
                 let senderAddress, receiverAddress;
 
                 if (actionType === "buy") {
-                    senderAddress = currentSessionWallet; 
-                    receiverAddress = milarSystemEscrow;
+                    senderAddress = milarSystemEscrow; 
+                    receiverAddress = currentSessionWallet;
                 } else {
                     senderAddress = currentSessionWallet;
                     receiverAddress = recipientUser;
@@ -370,7 +370,7 @@
 
                 await loadGridInventory(); 
             } catch (err) {
-                alert("❌ Gateway transmission error. Network pipeline timed out.");
+                alert("you do not have sufficent balance to buy the selected sherd.");
             }
         }
 
