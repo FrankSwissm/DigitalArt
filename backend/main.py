@@ -143,11 +143,10 @@ def process_transaction():
         sender_shard_wallet = TARGET_WALLET
         receiver_shard_wallet = wallet
     else:
-        # For sales: the current user is the seller (sender) and the recipient is the buyer (receiver)
         sender_shard_wallet = wallet
         receiver_shard_wallet = target_recipient
 
-    # 1. Instruct Semhal Core System to mutate the currency ledger balances ONLY on direct purchases
+    # 1. Direct Purchase Protocol: Instruct Semhal System to check/mutate capital balances
     if action == "buy":
         payload = {
             "wallet": wallet,
@@ -160,7 +159,6 @@ def process_transaction():
         }
         
         try:
-            # Extended timeout to give the server ample window to complete cold wake-ups
             response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/settle-transaction", json=payload, timeout=25)
             
             res_json = {}
@@ -173,10 +171,8 @@ def process_transaction():
                             "message": "you do not have sufficent balance to buy the selected sherd."
                         }), 400
                 except ValueError:
-                    # Fallback layer: if code is 200 but payload returns plaintext, pass to ensure local mutations execute
                     pass
             else:
-                print(f"Semhal Raw Error Response Log: {response.text}")
                 return jsonify({
                     "status": "rejected",
                     "message": "you do not have sufficent balance to buy the selected sherd."
@@ -184,17 +180,37 @@ def process_transaction():
                 
         except requests.exceptions.RequestException as err:
             print("Semhal routing cold start warning - handling local orchestration pass-through:", err)
+            
+    # 2. P2P Direct Sales Protocol: Verify account existence without balance checks
     else:
-        # P2P Transfer mode bypasses Semhal balance modification completely
-        print(f"P2P Transfer Mode: Shards shifting from {sender_shard_wallet} to {receiver_shard_wallet} via custom offline transaction pricing.")
+        try:
+            with get_db_connection() as conn:
+                with conn.cursor() as cur:
+                    # Match clean lowercase values for network integrity checks
+                    cur.execute(
+                        "SELECT 1 FROM milar_users WHERE LOWER(wallet_address) = LOWER(%s);",
+                        (target_recipient,)
+                    )
+                    buyer_exists = cur.fetchone()
+                    
+                    if not buyer_exists:
+                        return jsonify({
+                            "status": "rejected",
+                            "message": "user did not have milar account"
+                        }), 400
+        except Exception as db_err:
+            return jsonify({
+                "status": "rejected",
+                "message": f"Account validation process error: {str(db_err)}"
+            }), 500
 
-    # 2. Add structural token shard allocation log entry to Milar's table matrix
+    # 3. Add token shard allocation log entry to update positions
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     """INSERT INTO milar_transactions (sender_wallet, receiver_wallet, asset_id, action_type, amount_shards, price_per_shard, total_value_susd)
-                       VALUES (%s, %s, %s, %s, %s, %s %s);""",
+                       VALUES (%s, %s, %s, %s, %s, %s, %s);""",
                     (sender_shard_wallet, receiver_shard_wallet, asset_id, action, amount, PRICE_PER_SHARD, base_value)
                 )
                 conn.commit()
@@ -206,7 +222,7 @@ def process_transaction():
 
     return jsonify({
         "status": "synchronized",
-        "message": "Transaction verified and executed successfully. Semhal balance shifted; Milar shards allocated."
+        "message": "Transaction verified and executed successfully. Positions synchronized."
     })
 
 if __name__ == "__main__":
