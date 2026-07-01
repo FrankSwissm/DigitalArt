@@ -146,49 +146,53 @@ def process_transaction():
         sender_shard_wallet = wallet
         receiver_shard_wallet = target_recipient
 
-    # 1. Instruct Semhal Core System to mutate the currency ledger balances
-    payload = {
-        "wallet": wallet,
-        "target_recipient": target_recipient,
-        "action": action,
-        "asset_id": asset_id,
-        "amount": amount,
-        "total_value_susd": base_value,
-        "milar_system_escrow": TARGET_WALLET
-    }
-    
-    try:
-        # Extended timeout to give the server ample window to complete cold wake-ups
-        response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/settle-transaction", json=payload, timeout=25)
+    # 1. Instruct Semhal Core System to mutate the currency ledger balances ONLY on direct purchases
+    if action == "buy":
+        payload = {
+            "wallet": wallet,
+            "target_recipient": target_recipient,
+            "action": action,
+            "asset_id": asset_id,
+            "amount": amount,
+            "total_value_susd": base_value,
+            "milar_system_escrow": TARGET_WALLET
+        }
         
-        # Guarded check to safely extract JSON parameters or trace structural text returns
-        res_json = {}
-        if response.status_code == 200:
-            try:
-                res_json = response.json()
-            except ValueError:
+        try:
+            # Extended timeout to give the server ample window to complete cold wake-ups
+            response = requests.post(f"{SEMHAL_ECOSYSTEM_URL}/api/settle-transaction", json=payload, timeout=25)
+            
+            # Guarded check to safely extract JSON parameters or trace structural text returns
+            res_json = {}
+            if response.status_code == 200:
+                try:
+                    res_json = response.json()
+                except ValueError:
+                    return jsonify({
+                        "status": "rejected",
+                        "message": "Protocol Misalignment: Semhal system responded with non-JSON text payload."
+                    }), 502
+            else:
+                print(f"Semhal Raw Error Response Log: {response.text}")
                 return jsonify({
                     "status": "rejected",
-                    "message": "Protocol Misalignment: Semhal system responded with non-JSON text payload."
-                }), 502
-        else:
-            print(f"Semhal Raw Error Response Log: {response.text}")
-            return jsonify({
-                "status": "rejected",
-                "message": f"Semhal remote core node rejected transaction with status code {response.status_code}."
-            }), response.status_code
-        
-        if res_json.get("status") == "rejected":
-            return jsonify({
-                "status": "rejected",
-                "message": res_json.get("message", "Transaction rejected: Semhal Core reported insufficient funds or failed balance modification.")
-            }), 400
+                    "message": "you do not have sufficent balance to buy the selected sherd."
+                }), 400
             
-    except requests.exceptions.RequestException as err:
-        return jsonify({
-            "status": "rejected",
-            "message": f"Critical Error: Unable to communicate with Semhal Core System to deduct balances. {str(err)}"
-        }), 503
+            if res_json.get("status") == "rejected" or "insufficient" in res_json.get("message", "").lower():
+                return jsonify({
+                    "status": "rejected",
+                    "message": "you do not have sufficent balance to buy the selected sherd."
+                }), 400
+                
+        except requests.exceptions.RequestException as err:
+            return jsonify({
+                "status": "rejected",
+                "message": f"Critical Error: Unable to communicate with Semhal Core System to deduct balances. {str(err)}"
+            }), 503
+    else:
+        # P2P Transfer mode bypasses Semhal balance modification completely
+        print(f"P2P Transfer Mode: Shards shifting from {sender_shard_wallet} to {receiver_shard_wallet} via custom offline transaction pricing.")
 
     # 2. Add structural token shard allocation log entry to Milar's table matrix
     try:
@@ -203,7 +207,7 @@ def process_transaction():
     except Exception as db_err:
         return jsonify({
             "status": "rejected", 
-            "message": f"Milar Local Ledger sync failure after Semhal deduction: {str(db_err)}. Check system logs immediately."
+            "message": f"Milar Local Ledger sync failure after execution check: {str(db_err)}. Check system logs immediately."
         }), 500
 
     return jsonify({
