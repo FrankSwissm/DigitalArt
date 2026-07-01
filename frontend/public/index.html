@@ -21,7 +21,6 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased">
 
-    <!-- AUTH OVERLAY SHIELD -->
     <div id="authOverlay" class="fixed inset-0 bg-gray-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
         <div class="bg-gray-900 border border-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl">
             <div class="text-center mb-6">
@@ -54,7 +53,6 @@
         </div>
     </div>
 
-    <!-- SETTLEMENT MANIFEST RECEIPT POPUP MODAL -->
     <div id="receiptModal" class="fixed inset-0 bg-gray-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-all duration-300">
         <div class="bg-gray-950 border border-amber-500/30 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl holo-glow flex flex-col">
             <div class="h-[3px] w-full holo-border"></div>
@@ -102,7 +100,6 @@
         </div>
     </div>
 
-    <!-- MAIN APP DESIGN SYSTEM WORKSPACE -->
     <div id="appWorkspace" class="hidden">
         <header class="border-b border-gray-800 bg-gray-950 p-4 sticky top-0 z-40 shadow-md">
             <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -161,6 +158,13 @@
                 loadGridInventory();
             }
         });
+
+        function normalizeAssetId(rawId) {
+            const cleanId = String(rawId).trim();
+            if (cleanId === "100" || cleanId === "0100") return "0100";
+            if (cleanId === "101" || cleanId === "0101") return "0101";
+            return cleanId;
+        }
 
         function toggleAuthMode(mode) {
             currentAuthMode = mode;
@@ -271,6 +275,7 @@
             grid.innerHTML = ""; 
 
             assets.forEach(item => {
+                const normId = normalizeAssetId(item.id);
                 const ownedCount = parseFloat(item.user_owned_shards) || 0;
                 const soldCount = parseFloat(item.shards_sold) || 0;
                 const remainingCount = parseFloat(item.shards_remaining) || 0;
@@ -282,12 +287,11 @@
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-center gap-2 mb-3">
-                            <span class="font-mono text-[10px] text-gray-500 font-bold">NODE: #${item.id}</span>
+                            <span class="font-mono text-[10px] text-gray-500 font-bold">NODE: #${normId}</span>
                             <span class="bg-gray-900 border border-gray-800 text-gray-400 text-[9px] px-2 py-0.5 rounded-md font-mono font-bold uppercase tracking-wide">${item.tag || 'DEITY MATRIX'}</span>
                         </div>
                         <h3 class="text-base font-bold text-white mb-1">${item.name}</h3>
                         
-                        <!-- REAL-TIME TRACKING SYSTEM STATISTICS -->
                         <div class="mt-4 bg-gray-900/60 border border-gray-800/80 rounded-xl p-3 space-y-2 font-mono text-[11px]">
                             <div class="text-gray-500 border-b border-gray-800/50 pb-1 uppercase text-[9px] tracking-wider font-bold">Milar Vault Status Matrix</div>
                             <div class="flex justify-between">
@@ -319,10 +323,10 @@
 
                     <div class="pt-3 border-t border-gray-900 mt-1">
                         <div class="flex items-center gap-2">
-                            <input type="number" id="qty-${item.id}" value="10" min="1" class="w-16 bg-gray-900 border border-gray-800 rounded-lg p-2 text-center text-xs font-mono font-bold text-white focus:outline-none">
+                            <input type="number" id="qty-${normId}" value="10" min="1" class="w-16 bg-gray-900 border border-gray-800 rounded-lg p-2 text-center text-xs font-mono font-bold text-white focus:outline-none">
                             <div class="flex gap-2 flex-1">
-                                <button onclick="executeTrade('${item.id}', 'buy')" class="flex-1 bg-amber-500 hover:bg-amber-400 text-gray-950 font-black text-xs py-2 rounded-lg uppercase tracking-wider transition">Buy</button>
-                                <button onclick="executeTrade('${item.id}', 'sell')" class="flex-1 bg-gray-900 hover:bg-red-950/40 border border-gray-800 hover:border-red-900 text-gray-400 hover:text-red-400 font-bold text-xs py-2 rounded-lg uppercase tracking-wider transition">Sell P2P</button>
+                                <button onclick="executeTrade('${normId}', 'buy')" class="flex-1 bg-amber-500 hover:bg-amber-400 text-gray-950 font-black text-xs py-2 rounded-lg uppercase tracking-wider transition">Buy</button>
+                                <button onclick="executeTrade('${normId}', 'sell')" class="flex-1 bg-gray-900 hover:bg-red-950/40 border border-gray-800 hover:border-red-900 text-gray-400 hover:text-red-400 font-bold text-xs py-2 rounded-lg uppercase tracking-wider transition">Sell P2P</button>
                             </div>
                         </div>
                     </div>
@@ -333,14 +337,16 @@
 
         function filterLocalGrid() {
             const token = document.getElementById("matrixSearch").value.toLowerCase().trim();
-            const matching = localCacheMatrix.filter(item => 
-                item.name.toLowerCase().includes(token) || item.id.toString().includes(token)
-            );
+            const matching = localCacheMatrix.filter(item => {
+                const normId = normalizeAssetId(item.id);
+                return item.name.toLowerCase().includes(token) || normId.includes(token);
+            });
             renderGrid(matching);
         }
 
         async function executeTrade(assetId, actionType) {
-            const size = parseFloat(document.getElementById(`qty-${assetId}`).value);
+            const normId = normalizeAssetId(assetId);
+            const size = parseFloat(document.getElementById(`qty-${normId}`).value);
             let recipientUser = "";
 
             if (actionType === "sell") {
@@ -361,7 +367,7 @@
                         action: actionType,
                         wallet: currentSessionWallet,
                         target_recipient: recipientUser,
-                        asset_id: assetId,
+                        asset_id: normId,
                         amount: size
                     })
                 });
