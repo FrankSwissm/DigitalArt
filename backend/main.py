@@ -34,6 +34,15 @@ def load_json_file(path, default_factory):
             except json.JSONDecodeError: return default_factory()
     return default_factory()
 
+def normalize_asset_id(raw_id):
+    """Normalizes string or integer asset inputs to preserve '0100' and '0101' format specs."""
+    clean_id = str(raw_id).strip()
+    if clean_id in ('100', '0100'):
+        return '0100'
+    if clean_id in ('101', '0101'):
+        return '0101'
+    return clean_id
+
 @app.route("/")
 def serve_frontend():
     return send_from_directory(app.static_folder, "index.html")
@@ -91,7 +100,8 @@ def get_ledger():
                     GROUP BY asset_id;
                 """, (MILAR_VAULT_ACCOUNT,))
                 for row in cur.fetchall():
-                    total_sold_per_asset[str(row['asset_id'])] = float(row['total_sold'])
+                    norm_id = normalize_asset_id(row['asset_id'])
+                    total_sold_per_asset[norm_id] = total_sold_per_asset.get(norm_id, 0.0) + float(row['total_sold'])
 
                 # 2. Extract current calculated balance position relative to targeted active user session signature
                 if wallet:
@@ -105,13 +115,14 @@ def get_ledger():
                     """
                     cur.execute(query, (wallet, wallet, wallet, wallet))
                     for row in cur.fetchall():
-                        user_balances[str(row['asset_id'])] = float(row['balance'])
+                        norm_id = normalize_asset_id(row['asset_id'])
+                        user_balances[norm_id] = user_balances.get(norm_id, 0.0) + float(row['balance'])
     except Exception as err:
         print("Relational computational lookup exception:", err)
 
     # Re-map positional structure vectors for each element within the 101 matrix blocks
     for item in matrix:
-        asset_str_id = str(item["id"])
+        asset_str_id = normalize_asset_id(item["id"])
         sold_volume = total_sold_per_asset.get(asset_str_id, 0.0)
         remaining_volume = INITIAL_TOTAL_SHARDS_PER_DEITY - sold_volume
 
@@ -130,7 +141,7 @@ def process_transaction():
     wallet = data.get("wallet", "").strip()
     target_recipient = data.get("target_recipient", "").strip()
     amount = float(data.get("amount", 0))
-    asset_id = str(data.get("asset_id", ""))
+    asset_id = normalize_asset_id(data.get("asset_id", ""))
     
     if not wallet:
         return jsonify({"status": "rejected", "message": "Missing public validation key signature."}), 400
