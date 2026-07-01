@@ -342,7 +342,9 @@
                 });
 
                 const payload = await response.json();
-                if (payload.status !== "synchronized" && payload.status !== "success") {
+                
+                // Fixed logic to safely process alternative status strings returned by backend layers
+                if (!response.ok || (payload.status !== "synchronized" && payload.status !== "success")) {
                     alert("you do not have sufficent balance to buy the selected sherd.");
                     return;
                 }
