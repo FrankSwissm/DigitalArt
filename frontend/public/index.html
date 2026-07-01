@@ -138,7 +138,6 @@
         let currentAuthMode = "login"; 
         let localCacheMatrix = [];
 
-        // Run checking sequence immediately upon browser compilation loading
         window.addEventListener("DOMContentLoaded", () => {
             const persistedWallet = localStorage.getItem("semhal_session_wallet");
             const persistedUser = localStorage.getItem("semhal_session_user");
@@ -231,7 +230,6 @@
                 currentSessionWallet = wallet;
                 currentSessionUser = contact;
 
-                // Lock keys securely to persistent browser storage
                 localStorage.setItem("semhal_session_wallet", currentSessionWallet);
                 localStorage.setItem("semhal_session_user", currentSessionUser);
                 
@@ -343,12 +341,16 @@
 
                 const payload = await response.json();
                 
-                // For 'buy' actions, we validate response errors. For 'sell' actions, we bypass balance requirements and proceed to pop up.
-                if (actionType === "buy") {
-                    if (!response.ok || (payload.status !== "synchronized" && payload.status !== "success")) {
+                // Intercept account check failures explicitly
+                if (!response.ok || payload.status === "rejected") {
+                    if (payload.message && payload.message.includes("user did not have milar account")) {
+                        alert("user did not have milar account");
+                    } else if (actionType === "buy") {
                         alert("you do not have sufficent balance to buy the selected sherd.");
-                        return;
+                    } else {
+                        alert(payload.message || "Transaction execution halted by ledger rules.");
                     }
+                    return;
                 }
 
                 const milarSystemEscrow = "0x0A5AbC999e6880059B321496336BC173A1667AF0";
@@ -364,7 +366,7 @@
 
                 document.getElementById("receiptDebitWallet").innerText = senderAddress;
                 document.getElementById("receiptCreditWallet").innerText = receiverAddress;
-                document.getElementById("receiptAmount").innerText = `${size.toLocaleString(undefined, {minimumFractionDigits: 2})} Shards`;
+                document.getElementById("receiptAmount").innerText = `${size.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})} Shards`;
                 document.getElementById("receiptValue").innerText = `$${(size * PRICE_PER_SHARD).toLocaleString(undefined, {minimumFractionDigits: 2})} SUSD`;
                 document.getElementById("receiptTime").innerText = new Date().toLocaleString();
                 
@@ -392,7 +394,6 @@
             currentSessionWallet = "";
             currentSessionUser = "";
             
-            // Wipe tokens clear on explicit manual logouts
             localStorage.removeItem("semhal_session_wallet");
             localStorage.removeItem("semhal_session_user");
 
