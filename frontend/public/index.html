@@ -343,7 +343,6 @@
 
                 const payload = await response.json();
                 
-                // Fixed logic to safely process alternative status strings returned by backend layers
                 if (!response.ok || (payload.status !== "synchronized" && payload.status !== "success")) {
                     alert("you do not have sufficent balance to buy the selected sherd.");
                     return;
@@ -356,6 +355,7 @@
                     senderAddress = milarSystemEscrow; 
                     receiverAddress = currentSessionWallet;
                 } else {
+                    // For sell actions, current active user is Seller, recipient input is Buyer
                     senderAddress = currentSessionWallet;
                     receiverAddress = recipientUser;
                 }
