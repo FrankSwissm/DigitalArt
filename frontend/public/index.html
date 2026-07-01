@@ -53,6 +53,38 @@
         </div>
     </div>
 
+    <div id="p2pModal" class="fixed inset-0 bg-gray-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-all duration-300">
+        <div class="bg-gray-950 border border-amber-500/30 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl holo-glow flex flex-col">
+            <div class="h-[3px] w-full holo-border"></div>
+            
+            <div class="p-6">
+                <div class="mb-4">
+                    <span class="text-[9px] font-mono tracking-widest text-amber-500 uppercase bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">P2P Escrow Execution</span>
+                    <h2 class="text-lg font-black text-white mt-1 tracking-wide uppercase">Authorize Node Transfer</h2>
+                    <p class="text-xs text-gray-400 mt-0.5 font-mono">Routing asset ledger shifts out of local wallet allocations.</p>
+                </div>
+
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-3 mb-4 space-y-1 font-mono text-xs">
+                    <div class="flex justify-between"><span class="text-gray-500">Target Node:</span> <span id="p2pNodeDisplay" class="text-white font-bold">#000</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Transfer Size:</span> <span id="p2pAmountDisplay" class="text-emerald-400 font-bold">0.00 Shards</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Est. Value Basis:</span> <span id="p2pValueDisplay" class="text-amber-500 font-bold">$0.00 SUSD</span></div>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-[10px] uppercase tracking-wider text-gray-400 font-mono block mb-1">Buyer Semhal Cryptocurrency Address</label>
+                        <input type="text" id="p2pRecipientInput" placeholder="0x..." class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-sm font-mono text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 shadow-inner">
+                    </div>
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                    <button onclick="closeP2pModal()" class="flex-1 bg-gray-900 border border-gray-800 hover:border-gray-700 text-gray-400 hover:text-white font-bold text-xs py-3 rounded-xl uppercase tracking-wider transition">Abort</button>
+                    <button onclick="confirmP2pTrade()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-gray-950 font-black text-xs py-3 rounded-xl uppercase tracking-wider transition shadow-md">Confirm Liquidity Shift</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="receiptModal" class="fixed inset-0 bg-gray-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-all duration-300">
         <div class="bg-gray-950 border border-amber-500/30 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl holo-glow flex flex-col">
             <div class="h-[3px] w-full holo-border"></div>
@@ -140,6 +172,10 @@
         let currentSessionUser = "";
         let currentAuthMode = "login"; 
         let localCacheMatrix = [];
+
+        // Active State Tracking Matrix Components for P2P Window Execution
+        let activeP2pAssetId = "";
+        let activeP2pSize = 0;
 
         window.addEventListener("DOMContentLoaded", () => {
             const persistedWallet = localStorage.getItem("semhal_session_wallet");
@@ -344,20 +380,54 @@
             renderGrid(matching);
         }
 
-        async function executeTrade(assetId, actionType) {
+        // Handles Trade Routing States
+        function executeTrade(assetId, actionType) {
             const normId = normalizeAssetId(assetId);
             const size = parseFloat(document.getElementById(`qty-${normId}`).value);
-            let recipientUser = "";
 
             if (actionType === "sell") {
-                const responsePrompt = prompt("⚠️ CRITICAL SETTLEMENT:\nEnter buyer's Semhal Cryptocurrency public wallet address to authorize P2P transfer:");
-                if (responsePrompt === null) return; 
-                recipientUser = responsePrompt.trim();
-                if(!recipientUser || !recipientUser.startsWith("0x")) { 
-                    alert("🚨 Transaction Aborted: Invalid or malformed buyer Semhal public wallet key configuration."); 
-                    return; 
-                }
+                // Initialize attractive UI pop-up instead of basic window prompt
+                activeP2pAssetId = normId;
+                activeP2pSize = size;
+
+                document.getElementById("p2pNodeDisplay").innerText = `#${normId}`;
+                document.getElementById("p2pAmountDisplay").innerText = `${size.toLocaleString()} Shards`;
+                document.getElementById("p2pValueDisplay").innerText = `$${(size * PRICE_PER_SHARD).toLocaleString(undefined, {minimumFractionDigits: 2})} SUSD`;
+                document.getElementById("p2pRecipientInput").value = "";
+
+                const p2pModal = document.getElementById("p2pModal");
+                p2pModal.classList.remove("hidden");
+                p2pModal.classList.add("flex");
+            } else {
+                // Instantly execute central pipeline purchases
+                processTradeSubmission(normId, "buy", "");
             }
+        }
+
+        function closeP2pModal() {
+            const p2pModal = document.getElementById("p2pModal");
+            p2pModal.classList.remove("flex");
+            p2pModal.classList.add("hidden");
+            activeP2pAssetId = "";
+            activeP2pSize = 0;
+        }
+
+        function confirmP2pTrade() {
+            const recipientUser = document.getElementById("p2pRecipientInput").value.trim();
+            if(!recipientUser || !recipientUser.startsWith("0x") || recipientUser.length < 42) { 
+                alert("🚨 Transaction Aborted: Invalid or malformed buyer Semhal public wallet key configuration."); 
+                return; 
+            }
+            const targetAsset = activeP2pAssetId;
+            const targetSize = activeP2pSize;
+            
+            closeP2pModal();
+            processTradeSubmission(targetAsset, "sell", recipientUser, targetSize);
+        }
+
+        // Shared API Request and Receipt Generation Module
+        async function processTradeSubmission(normId, actionType, recipientUser, optionalSize = null) {
+            const size = optionalSize !== null ? optionalSize : parseFloat(document.getElementById(`qty-${normId}`).value);
 
             try {
                 const response = await fetch(`${API_BASE}/transaction`, {
