@@ -21,6 +21,7 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased">
 
+    <!-- AUTH OVERLAY SHIELD -->
     <div id="authOverlay" class="fixed inset-0 bg-gray-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
         <div class="bg-gray-900 border border-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl">
             <div class="text-center mb-6">
@@ -53,6 +54,7 @@
         </div>
     </div>
 
+    <!-- SETTLEMENT MANIFEST RECEIPT POPUP MODAL -->
     <div id="receiptModal" class="fixed inset-0 bg-gray-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-all duration-300">
         <div class="bg-gray-950 border border-amber-500/30 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl holo-glow flex flex-col">
             <div class="h-[3px] w-full holo-border"></div>
@@ -100,6 +102,7 @@
         </div>
     </div>
 
+    <!-- MAIN APP DESIGN SYSTEM WORKSPACE -->
     <div id="appWorkspace" class="hidden">
         <header class="border-b border-gray-800 bg-gray-950 p-4 sticky top-0 z-40 shadow-md">
             <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -119,8 +122,11 @@
         </header>
 
         <main class="max-w-7xl mx-auto p-6">
-            <div class="mb-6">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <input id="matrixSearch" type="text" placeholder="🔍 Filter ledger matrices allocations..." oninput="filterLocalGrid()" class="w-full max-w-sm bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs font-mono focus:outline-none focus:border-amber-500 text-white shadow-inner">
+                <div class="text-[11px] font-mono text-gray-400 bg-gray-950 border border-gray-800 px-4 py-2 rounded-xl">
+                    Vault Source Engine IP: <span class="text-amber-500">0x0A5AbC999e6880059B321496336BC173A1667AF0</span>
+                </div>
             </div>
             <section>
                 <div id="marketGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -266,6 +272,10 @@
 
             assets.forEach(item => {
                 const ownedCount = parseFloat(item.user_owned_shards) || 0;
+                const soldCount = parseFloat(item.shards_sold) || 0;
+                const remainingCount = parseFloat(item.shards_remaining) || 0;
+                const initialCount = parseFloat(item.initial_allocation) || 1000000000.00;
+                
                 const card = document.createElement("div");
                 card.className = "p-5 rounded-xl border border-gray-800 bg-gray-950 flex flex-col justify-between hover:border-gray-700 transition duration-150 shadow-lg";
                 
@@ -273,12 +283,29 @@
                     <div>
                         <div class="flex justify-between items-center gap-2 mb-3">
                             <span class="font-mono text-[10px] text-gray-500 font-bold">NODE: #${item.id}</span>
-                            <span class="bg-gray-900 border border-gray-800 text-gray-400 text-[9px] px-2 py-0.5 rounded-md font-mono font-bold uppercase tracking-wide">${item.tag || 'SHARD'}</span>
+                            <span class="bg-gray-900 border border-gray-800 text-gray-400 text-[9px] px-2 py-0.5 rounded-md font-mono font-bold uppercase tracking-wide">${item.tag || 'DEITY MATRIX'}</span>
                         </div>
                         <h3 class="text-base font-bold text-white mb-1">${item.name}</h3>
                         
+                        <!-- REAL-TIME TRACKING SYSTEM STATISTICS -->
+                        <div class="mt-4 bg-gray-900/60 border border-gray-800/80 rounded-xl p-3 space-y-2 font-mono text-[11px]">
+                            <div class="text-gray-500 border-b border-gray-800/50 pb-1 uppercase text-[9px] tracking-wider font-bold">Milar Vault Status Matrix</div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Initial Block:</span>
+                                <span class="text-gray-300 font-bold">${initialCount.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-amber-500 font-bold">Total Shards Sold:</span>
+                                <span class="text-amber-400 font-black">${soldCount.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-emerald-500 font-bold">Total Shards Left:</span>
+                                <span class="text-emerald-400 font-black">${remainingCount.toLocaleString()}</span>
+                            </div>
+                        </div>
+
                         <div class="mt-3 bg-gray-900 border border-gray-800 p-2.5 rounded-lg flex justify-between items-center">
-                            <span class="text-xs text-gray-400">Position:</span>
+                            <span class="text-xs text-gray-400">Your Personal Position:</span>
                             <span class="text-xs font-mono font-bold ${ownedCount > 0 ? 'text-emerald-400 font-black' : 'text-gray-600'}">
                                 ${ownedCount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})} Shards
                             </span>
@@ -341,7 +368,6 @@
 
                 const payload = await response.json();
                 
-                // Intercept account check failures explicitly
                 if (!response.ok || payload.status === "rejected") {
                     if (payload.message && payload.message.includes("user did not have milar account")) {
                         alert("user did not have milar account");
@@ -393,10 +419,8 @@
         function terminateSession() {
             currentSessionWallet = "";
             currentSessionUser = "";
-            
             localStorage.removeItem("semhal_session_wallet");
             localStorage.removeItem("semhal_session_user");
-
             document.getElementById("authOverlay").classList.remove("hidden");
             document.getElementById("appWorkspace").classList.add("hidden");
         }
