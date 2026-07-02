@@ -24,7 +24,8 @@ def get_db_connection():
     return psycopg.connect(NEON_DATABASE_URL, row_factory=dict_row)
 
 # ─── REBALANCING MATRIX CONSTRAINTS ──────────────────────────────────
-INITIAL_TOTAL_SHARDS_PER_DEITY = 1000000000.00  # 1 Billion Shards Initial Per Deity
+# UPDATED: Changed from 1 Billion to exact 9,900,990.0990099 floating point shards per deity image
+INITIAL_TOTAL_SHARDS_PER_DEITY = 9900990.0990099  
 PRICE_PER_SHARD = 2000000.00                    # SUSD Price Basis
 
 def load_json_file(path, default_factory):
