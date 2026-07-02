@@ -151,14 +151,14 @@
         </header>
 
         <main class="max-w-7xl mx-auto p-6">
-            <div class="mb-6 p-4 rounded-xl border border-dashed border-gray-800 bg-gray-950/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div id="adminIngestionLayer" class="mb-6 p-4 rounded-xl border border-dashed border-gray-800 bg-gray-950/60 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                     <h4 class="text-xs font-black uppercase text-amber-500 tracking-wider font-mono">🏛️ Deity Node Ingestion Terminal</h4>
-                    <p class="text-[10px] text-gray-500 font-mono mt-0.5">Upload a master profile layer to trigger the MILAR 9,900,990.0990099 fragmentation slice matrix.</p>
+                    <p id="ingestionDescription" class="text-[10px] text-gray-500 font-mono mt-0.5">Upload a master profile layer to trigger the MILAR 9,900,990.0990099 fragmentation slice matrix.</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <input type="file" id="deityImageUpload" accept="image/*" class="hidden" onchange="handleAdminImageUpload(event)">
-                    <button onclick="document.getElementById('deityImageUpload').click()" class="bg-gray-900 hover:bg-gray-800 text-gray-300 font-mono text-[11px] font-bold py-2.5 px-4 border border-gray-800 rounded-xl transition">Select Master Asset</button>
+                    <button id="deityUploadBtn" onclick="triggerImageSelection()" class="bg-gray-900 hover:bg-gray-800 text-gray-300 font-mono text-[11px] font-bold py-2.5 px-4 border border-gray-800 rounded-xl transition">Select Master Asset</button>
                 </div>
             </div>
 
@@ -196,7 +196,8 @@
         const API_BASE = window.location.origin + "/api";
         const PRICE_PER_SHARD = 2000000.00; 
         const TOTAL_SHARDS_PER_IMAGE = 9900990.0990099;
-        const PAGE_SIZE = 5; // Display 5 shards at a time inside the viewport matrix
+        const PAGE_SIZE = 5; 
+        const MILAR_AUTHORIZED_ADMIN = "0x0A5AbC999e6880059B321496336BC173A1667AF0";
         
         let currentSessionWallet = "";
         let currentSessionUser = "";
@@ -223,6 +224,7 @@
                 document.getElementById("authOverlay").classList.add("hidden");
                 document.getElementById("appWorkspace").classList.remove("hidden");
                 
+                evaluateIngestionAccess();
                 loadGridInventory();
             }
         });
@@ -234,8 +236,36 @@
             return cleanId;
         }
 
+        // Restrict interaction capability strictly to authorized wallet profile configurations
+        function evaluateIngestionAccess() {
+            const uploadBtn = document.getElementById("deityUploadBtn");
+            const desc = document.getElementById("ingestionDescription");
+            
+            if (currentSessionWallet.toLowerCase() === MILAR_AUTHORIZED_ADMIN.toLowerCase()) {
+                uploadBtn.disabled = false;
+                uploadBtn.className = "bg-amber-500 hover:bg-amber-400 text-gray-950 font-mono text-[11px] font-black py-2.5 px-4 rounded-xl transition";
+                desc.innerHTML = 'Upload a master profile layer to trigger the MILAR 9,900,990.0990099 fragmentation slice matrix. <span class="text-emerald-400 font-bold">[Authorized Core Session]</span>';
+            } else {
+                uploadBtn.disabled = true;
+                uploadBtn.className = "bg-gray-950 text-gray-600 font-mono text-[11px] font-bold py-2.5 px-4 border border-gray-900 rounded-xl cursor-not-allowed";
+                desc.innerHTML = 'Deity master ingestion is locked. View-only terminal layer enabled for this node address. <span class="text-red-500/80 font-bold">[Read-Only Mode]</span>';
+            }
+        }
+
+        function triggerImageSelection() {
+            if (currentSessionWallet.toLowerCase() === MILAR_AUTHORIZED_ADMIN.toLowerCase()) {
+                document.getElementById('deityImageUpload').click();
+            } else {
+                alert("🚨 Operation Denied: Only the authoritative Milar master account (0x0A5AbC...) can select or upload deity assets.");
+            }
+        }
+
         // Processing custom administrative master profile layers
         function handleAdminImageUpload(event) {
+            if (currentSessionWallet.toLowerCase() !== MILAR_AUTHORIZED_ADMIN.toLowerCase()) {
+                alert("🚨 Operation Halted: Authentication mismatch.");
+                return;
+            }
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -256,7 +286,6 @@
                 const w = canvas.width; const h = canvas.height;
                 
                 if (!isUnlocked) {
-                    // Locked state representation structure
                     ctx.fillStyle = "#030712";
                     ctx.fillRect(0, 0, w, h);
                     ctx.strokeStyle = "rgba(245, 158, 11, 0.08)";
@@ -267,7 +296,6 @@
                 }
 
                 if (adminUploadedDeityDataUrl) {
-                    // Slice mapping generation based on uploaded admin master assets
                     const img = new Image();
                     img.onload = function() {
                         ctx.drawImage(img, 0, 0, w, h);
@@ -276,7 +304,6 @@
                         let seed = parseInt(seedIndex) || 101;
                         
                         for (let i = 0; i < data.length; i += 4) {
-                            // Convert image data matrices to high contrast black and white pixels
                             const brightness = 0.34 * data[i] + 0.5 * data[i+1] + 0.16 * data[i+2];
                             seed = (seed * 9301 + 49297) % 233280;
                             const noiseThreshold = (seed / 233280) * 255;
@@ -287,7 +314,6 @@
                     };
                     img.src = adminUploadedDeityDataUrl;
                 } else {
-                    // Fallback pure mathematical dither generation
                     ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, w, h);
                     let seed = parseInt(seedIndex) || 101;
                     for (let x = 0; x < w; x += 2) {
@@ -404,6 +430,7 @@
                 document.getElementById("authOverlay").classList.add("hidden");
                 document.getElementById("appWorkspace").classList.remove("hidden");
                 
+                evaluateIngestionAccess();
                 loadGridInventory();
             } catch (err) { alert("Communication node unreachable during authentication."); }
         }
@@ -440,7 +467,6 @@
 
                 for (let i = startIdx; i <= endIdx; i++) {
                     const personalShardsOwned = parseFloat(parentItem.user_owned_shards) || 0;
-                    // Fragment is viewable if user has fully acquired a shard threshold block
                     const isFullyOwnedShard = personalShardsOwned >= 1.0; 
 
                     targetedItems.push({
